@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">DrawWars</string>
+    <string name="title_activity_setup">SetupActivity</string>
+</resources>
