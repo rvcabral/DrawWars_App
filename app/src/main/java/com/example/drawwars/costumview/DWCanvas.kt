@@ -7,6 +7,9 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.view.MotionEvent
 import android.view.View
+import com.microsoft.signalr.HubConnection
+import com.microsoft.signalr.HubConnectionBuilder
+import com.microsoft.signalr.HubConnectionState
 
 class DWCanvas(context: Context?) : View(context) {
     private val path = Path()
@@ -27,6 +30,7 @@ class DWCanvas(context: Context?) : View(context) {
             }
             MotionEvent.ACTION_MOVE ->{
                 path.lineTo(event.x, event.y)
+
                 postInvalidate()
                 return true
             }
