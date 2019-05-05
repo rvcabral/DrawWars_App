@@ -13,6 +13,7 @@ import com.microsoft.signalr.HubConnectionState
 import java.util.*
 import java.util.function.Consumer
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class  ServerService: Service() {
     private val TAG = "MyService"
@@ -37,9 +38,19 @@ class  ServerService: Service() {
         }
 
         hubConnection.on("AckSession", { x-> AckSession(x)  }, HandShakeResult::class.java)
-        hubConnection.on("AckNickname", {success-> AckNickname(success)}, Boolean::class.java)
+        hubConnection.on("AckNickname", {AckNickname()})
+        hubConnection.on("NonExistingSession",{uid->NonExistingSession(uid)}, UUID::class.java)
+        hubConnection.on("DrawThemes", {m -> DrawThemes(m as HashMap<UUID, List<String>>) }, HashMap::class.java)
 
     }
+
+    private fun NonExistingSession(uid: UUID?) {
+        /*if(gameContext==null)
+            gameContext = HandShakeResult(UU, uid!!)*/
+        for(listener in listeners)
+            listener.NonExistingSession()
+    }
+
     fun  isConnected():Boolean {
         return connected;
     }
@@ -50,9 +61,15 @@ class  ServerService: Service() {
             listener.AckSession()
         }
     }
-    fun AckNickname(success : Boolean){
+    fun AckNickname(){
         for( listener in listeners){
             listener.AckNickname()
+        }
+    }
+    fun DrawThemes(themes: HashMap<UUID, List<String>>){
+        var list = themes[gameContext!!.playerId] as List<String>
+        for(listener in listeners){
+            listener.DrawThemes( list )
         }
     }
 
@@ -87,6 +104,11 @@ class  ServerService: Service() {
     fun sendNickName(nickname:String){
         hubConnection.send("SetPlayerNickName", gameContext, nickname)
     }
-
+    fun SetArt(draw : ByteArray){
+        hubConnection.send("SetArt", gameContext, draw)
+    }
+    fun Ready() {
+        hubConnection.send("Ready", gameContext)
+    }
 }
 

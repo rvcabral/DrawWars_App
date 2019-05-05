@@ -15,6 +15,14 @@ import kotlinx.android.synthetic.main.activity_setup.*
 import kotlinx.android.synthetic.main.content_setup.*
 
 class SetupActivity : AppCompatActivity(), ServiceListener {
+    override fun DrawThemes(themes: List<String>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun NonExistingSession() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun AckSession() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -66,6 +74,7 @@ class SetupActivity : AppCompatActivity(), ServiceListener {
 
     override fun onPause() {
         super.onPause()
+        service?.mute(this)
     }
 
     private fun bindService() {

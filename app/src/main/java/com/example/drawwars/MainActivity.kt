@@ -16,6 +16,15 @@ import com.example.drawwars.services.ServiceListener
 
 
 class MainActivity : AppCompatActivity(), ServiceListener {
+    override fun DrawThemes(themes: List<String>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun NonExistingSession() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+
     override fun AckSession() {
         val intent = Intent(this, SetupActivity::class.java)
         startActivity(intent)
@@ -70,6 +79,7 @@ class MainActivity : AppCompatActivity(), ServiceListener {
 
     override fun onPause() {
         super.onPause()
+        service?.mute(this)
     }
 
     private fun bindService() {

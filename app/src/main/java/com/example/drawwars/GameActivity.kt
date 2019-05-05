@@ -22,76 +22,48 @@ import android.util.Log
 import com.example.drawwars.services.ServerService.MyBinder
 import android.content.Context.BIND_AUTO_CREATE
 import android.content.Intent
+import android.graphics.Bitmap
+import android.opengl.Visibility
 import android.support.v4.app.BundleCompat.getBinder
+import android.widget.Button
+import com.example.drawwars.services.ServiceListener
+import android.util.DisplayMetrics
 
 
 
 
+class GameActivity : AppCompatActivity(), ServiceListener {
 
 
-class GameActivity : AppCompatActivity() {
-
-    private var mService: ServerService? = null
+    private var service: ServerService? = null
     private var mViewModel: ServiceViewModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
-        /*val hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5000/Server").build()
-        val context = this
-        hubConnection.start()
-        hubConnection.on("ReceiveNewCoordinates", {t-> Toast.makeText(context, t, Toast.LENGTH_LONG) },String::class.java )
-        if(hubConnection.connectionState == HubConnectionState.DISCONNECTED){
-            hubConnection.start()
-        }
-        hubConnection.send("MoveViewFromServer", "TEST 1" as String)
-        //hubConnection.
-        */
 
+        captionTextView.text = "Aguarde pelos outros jogadores"
+        submitDraw.visibility=Button.INVISIBLE
         mViewModel = ViewModelProviders.of(this).get(ServiceViewModel::class.java!!)
-        setObservers()
-        val canvas = DWCanvas(this);
-        //val conn = mViewModel!!.getServiceConnection()
-        canvasLayout.addView(canvas)
-    }
-
-    private fun toggleUpdates() {
-        if (mService != null) {
-            if(mService!!.isConnected()){
-
+        mViewModel?.getBinder()?.observe(this, object: Observer<ServerService.MyBinder> {
+            override fun onChanged(binder: ServerService.MyBinder?) {
+                service = binder?.getService()
+                service?.listen(this@GameActivity)
+                service!!.Ready()
             }
 
-
-        }
-    }
-
-    private fun setObservers() {
-        mViewModel!!.getBinder().observe(this, object : Observer<ServerService.MyBinder> {
-            override fun onChanged(myBinder: ServerService.MyBinder?) {
-                if (myBinder == null) {
-                    Log.d("Game Activity", "onChanged: unbound from service")
-                } else {
-                    Log.d("Game Activity", "onChanged: bound to service.")
-                    mService = myBinder!!.getService()
-                }
-            }
         })
 
-        mViewModel!!.isConnected().observe(this, object : Observer<Boolean> {
-            override fun onChanged( aBoolean: Boolean?) {
-                val handler = Handler()
-
-
-                // control what the button shows
-                if (aBoolean!!) {
-                    Toast.makeText( this@GameActivity,"ISConnected", Toast.LENGTH_LONG)
-
-                } else {
-                    Toast.makeText( this@GameActivity,"NotConnected", Toast.LENGTH_LONG)
-                }
-            }
-        })
     }
+
+
+     //region  Standart Functions
+
+    override fun onPause() {
+        super.onPause()
+        service?.mute(this)
+    }
+
 
 
     override fun onResume() {
@@ -106,7 +78,6 @@ class GameActivity : AppCompatActivity() {
             unbindService(mViewModel!!.getServiceConnection())
         }
     }
-
     private fun startService() {
         val serviceIntent = Intent(this, ServerService::class.java)
         startService(serviceIntent)
@@ -118,4 +89,38 @@ class GameActivity : AppCompatActivity() {
         val serviceBindIntent = Intent(this, ServerService::class.java)
         bindService(serviceBindIntent, mViewModel!!.getServiceConnection(), Context.BIND_AUTO_CREATE)
     }
+
+
+    override fun AckSession() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun AckNickname() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun NonExistingSession() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+    override fun DrawThemes(themes: List<String>) {
+
+        captionTextView.text = themes[0];
+
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val height = displayMetrics.heightPixels
+        val width = displayMetrics.widthPixels
+        val canvas = DWCanvas(this, height, width);
+        canvasLayout.addView(canvas)
+        submitDraw.visibility=Button.VISIBLE
+        submitDraw.setOnClickListener {
+
+            service!!.SetArt(canvas.getDraw())
+        }
+    }
+
+
+
+    //endregion
+
 }

@@ -15,9 +15,8 @@
             android:layout_marginBottom="8dp" app:layout_constraintBottom_toTopOf="@+id/canvasLayout"
             android:id="@+id/linearLayout">
         <TextView
-                android:text="Um gato a andar de mota"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" android:id="@+id/textView3" android:layout_weight="1"
+                android:layout_height="match_parent" android:id="@+id/captionTextView" android:layout_weight="1"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large" android:textAlignment="center"
                 android:gravity="center" android:textStyle="bold"/>
     </LinearLayout>

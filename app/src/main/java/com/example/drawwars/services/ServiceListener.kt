@@ -6,5 +6,7 @@ interface ServiceListener {
 
     fun AckSession()
     fun AckNickname()
+    fun NonExistingSession()
+    fun DrawThemes(themes:List<String>)
 
 }

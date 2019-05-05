@@ -1,25 +1,32 @@
 package com.example.drawwars.costumview
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Path
+import android.graphics.*
+import android.util.DisplayMetrics
 import android.view.MotionEvent
 import android.view.View
 import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
 import com.microsoft.signalr.HubConnectionState
+import android.graphics.Bitmap
+import java.io.ByteArrayOutputStream
 
-class DWCanvas(context: Context?) : View(context) {
+
+class DWCanvas(context: Context?, height:Int, width:Int ) : View(context) {
     private val path = Path()
     val brush = Paint()
+    val displayMetrics = DisplayMetrics()
+
+    private var bitmap: Bitmap?=null
+
     init {
         brush.isAntiAlias = false
         brush.color = Color.BLUE
         brush.style = Paint.Style.STROKE
         brush.strokeJoin = Paint.Join.ROUND
         brush.strokeWidth = 10f
+        bitmap = Bitmap.createBitmap(height, width,Bitmap.Config.ALPHA_8)
+
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -41,5 +48,13 @@ class DWCanvas(context: Context?) : View(context) {
 
     override fun onDraw(canvas: Canvas?) {
         canvas?.drawPath(path, brush)
+        canvas?.drawBitmap(bitmap, matrix, null)
+    }
+
+     fun getDraw():ByteArray{
+        val stream = ByteArrayOutputStream()
+        bitmap!!.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        val byteArray = stream.toByteArray()
+        return byteArray
     }
 }
