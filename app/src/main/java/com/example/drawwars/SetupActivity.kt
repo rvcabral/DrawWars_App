@@ -15,21 +15,12 @@ import kotlinx.android.synthetic.main.activity_setup.*
 import kotlinx.android.synthetic.main.content_setup.*
 
 class SetupActivity : AppCompatActivity(), ServiceListener {
-    override fun DrawThemes(themes: List<String>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun Interaction(action: String, param: Any?) {
+        when (action){
+            "AckNickname"-> startActivity(Intent(this, GameActivity::class.java ))
+        }
     }
 
-    override fun NonExistingSession() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun AckSession() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun AckNickname() {
-        startActivity(Intent(this, GameActivity::class.java ))
-    }
 
     private var mViewModel: ServiceViewModel? = null
     private var service: ServerService? = null

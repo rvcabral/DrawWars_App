@@ -1,12 +1,10 @@
 package com.example.drawwars.services
 
 import com.example.drawwars.ServiceViewModel
+import java.util.*
 
 interface ServiceListener {
 
-    fun AckSession()
-    fun AckNickname()
-    fun NonExistingSession()
-    fun DrawThemes(themes:List<String>)
 
+    fun Interaction(action:String, param:Any?)
 }

@@ -37,40 +37,20 @@ class  ServerService: Service() {
             connected = true;
         }
 
-        hubConnection.on("AckSession", { x-> AckSession(x)  }, HandShakeResult::class.java)
-        hubConnection.on("AckNickname", {AckNickname()})
-        hubConnection.on("NonExistingSession",{uid->NonExistingSession(uid)}, UUID::class.java)
-        hubConnection.on("DrawThemes", {m -> DrawThemes(m as HashMap<UUID, List<String>>) }, HashMap::class.java)
+        hubConnection.on("AckSession", { x-> gameContext = HandShakeResult(x.session,x.playerId );notifyListeners("AckSession",null)  }, HandShakeResult::class.java)
+        hubConnection.on("AckNickname", {notifyListeners("AckNickname",null)})
+        hubConnection.on("NonExistingSession",{uid->notifyListeners("NonExistingSession",uid)}, UUID::class.java)
+        hubConnection.on("DrawThemes", {m -> notifyListeners("DrawThemes",m ) }, Any::class.java)//as HashMap<UUID, List<String>>
 
     }
 
-    private fun NonExistingSession(uid: UUID?) {
-        /*if(gameContext==null)
-            gameContext = HandShakeResult(UU, uid!!)*/
+
+    private fun notifyListeners(action:String, param:Any?) {
+        var p = param
+        if(action=="DrawThemes")
+            p=(param as HashMap<UUID, List<String>>)[gameContext!!.playerId] as Any
         for(listener in listeners)
-            listener.NonExistingSession()
-    }
-
-    fun  isConnected():Boolean {
-        return connected;
-    }
-
-    fun AckSession(ctx : HandShakeResult){
-        gameContext = HandShakeResult(ctx.session,ctx.playerId )
-        for( listener in listeners){
-            listener.AckSession()
-        }
-    }
-    fun AckNickname(){
-        for( listener in listeners){
-            listener.AckNickname()
-        }
-    }
-    fun DrawThemes(themes: HashMap<UUID, List<String>>){
-        var list = themes[gameContext!!.playerId] as List<String>
-        for(listener in listeners){
-            listener.DrawThemes( list )
-        }
+            listener.Interaction(action, param)
     }
 
     inner class MyBinder : Binder() {

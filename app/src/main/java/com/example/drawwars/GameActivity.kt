@@ -49,11 +49,11 @@ class GameActivity : AppCompatActivity(), ServiceListener {
             override fun onChanged(binder: ServerService.MyBinder?) {
                 service = binder?.getService()
                 service?.listen(this@GameActivity)
-                service!!.Ready()
+
             }
 
         })
-
+        ReadyButton.setOnClickListener { service!!.Ready() }
     }
 
 
@@ -91,33 +91,29 @@ class GameActivity : AppCompatActivity(), ServiceListener {
     }
 
 
-    override fun AckSession() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun Interaction(action: String, param: Any?) {
+        val themes = param as List<String>
+        when (action){
+            "AckNickname"->{
+                captionTextView.text = themes[0];
 
-    override fun AckNickname() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+                val displayMetrics = DisplayMetrics()
+                windowManager.defaultDisplay.getMetrics(displayMetrics)
+                val height = displayMetrics.heightPixels
+                val width = displayMetrics.widthPixels
+                val canvas = DWCanvas(this, height, width);
+                canvasLayout.addView(canvas)
+                ReadyButton.visibility=Button.INVISIBLE
+                submitDraw.visibility=Button.VISIBLE
 
-    override fun NonExistingSession() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-    override fun DrawThemes(themes: List<String>) {
+                submitDraw.setOnClickListener {
 
-        captionTextView.text = themes[0];
-
-        val displayMetrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-        val height = displayMetrics.heightPixels
-        val width = displayMetrics.widthPixels
-        val canvas = DWCanvas(this, height, width);
-        canvasLayout.addView(canvas)
-        submitDraw.visibility=Button.VISIBLE
-        submitDraw.setOnClickListener {
-
-            service!!.SetArt(canvas.getDraw())
+                    service!!.SetArt(canvas.getDraw())
+                }
+            }
         }
     }
+
 
 
 

@@ -16,23 +16,18 @@ import com.example.drawwars.services.ServiceListener
 
 
 class MainActivity : AppCompatActivity(), ServiceListener {
-    override fun DrawThemes(themes: List<String>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
+    override fun Interaction(action: String, param: Any?) {
+        when (action){
+            "AckSession"->{
+                val intent = Intent(this, SetupActivity::class.java)
+                startActivity(intent)
+            }
+        }
     }
 
-    override fun NonExistingSession() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
 
-    override fun AckSession() {
-        val intent = Intent(this, SetupActivity::class.java)
-        startActivity(intent)
-    }
-
-    override fun AckNickname() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
     private var mViewModel: ServiceViewModel? = null
     private var service: ServerService? = null
