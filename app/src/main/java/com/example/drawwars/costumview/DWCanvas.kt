@@ -9,15 +9,16 @@ import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
 import com.microsoft.signalr.HubConnectionState
 import android.graphics.Bitmap
+import android.util.Base64
 import java.io.ByteArrayOutputStream
 
 
 class DWCanvas(context: Context?, height:Int, width:Int ) : View(context) {
     private val path = Path()
+    //private var myCanvas : Canvas?=null
     val brush = Paint()
-    val displayMetrics = DisplayMetrics()
 
-    private var bitmap: Bitmap?=null
+    //private var bitmap: Bitmap?=null
 
     init {
         brush.isAntiAlias = false
@@ -25,7 +26,10 @@ class DWCanvas(context: Context?, height:Int, width:Int ) : View(context) {
         brush.style = Paint.Style.STROKE
         brush.strokeJoin = Paint.Join.ROUND
         brush.strokeWidth = 10f
-        bitmap = Bitmap.createBitmap(height, width,Bitmap.Config.ALPHA_8)
+        //bitmap = Bitmap.createBitmap(height, width,Bitmap.Config.ALPHA_8)
+        //myCanvas=Canvas(bitmap);
+        isDrawingCacheEnabled =true
+        buildDrawingCache(true)
 
     }
 
@@ -37,24 +41,29 @@ class DWCanvas(context: Context?, height:Int, width:Int ) : View(context) {
             }
             MotionEvent.ACTION_MOVE ->{
                 path.lineTo(event.x, event.y)
-
                 postInvalidate()
                 return true
             }
+
         }
         postInvalidate()
         return false
     }
 
     override fun onDraw(canvas: Canvas?) {
+
         canvas?.drawPath(path, brush)
-        canvas?.drawBitmap(bitmap, matrix, null)
+        //canvas?.drawBitmap( bitmap,0F , 0F, brush);
+        //canvas?.drawBitmap(bitmap, matrix, brush)
     }
 
-     fun getDraw():ByteArray{
-        val stream = ByteArrayOutputStream()
-        bitmap!!.compress(Bitmap.CompressFormat.PNG, 100, stream)
-        val byteArray = stream.toByteArray()
-        return byteArray
+     fun getDraw():String{
+         val stream = ByteArrayOutputStream()
+         var bitmap = Bitmap.createBitmap(drawingCache)
+         bitmap!!.compress(Bitmap.CompressFormat.PNG, 100, stream)
+         val byteArray = stream.toByteArray()
+         val encodedImage = Base64.encodeToString(byteArray, Base64.DEFAULT)
+         val s = String(byteArray)
+         return s
     }
 }

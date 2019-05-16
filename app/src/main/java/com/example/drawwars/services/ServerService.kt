@@ -8,6 +8,7 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import com.example.drawwars.utils.HandShakeResult
+import com.google.gson.internal.LinkedTreeMap
 import com.microsoft.signalr.HubConnectionBuilder
 import com.microsoft.signalr.HubConnectionState
 import java.util.*
@@ -48,9 +49,9 @@ class  ServerService: Service() {
     private fun notifyListeners(action:String, param:Any?) {
         var p = param
         if(action=="DrawThemes")
-            p=(param as HashMap<UUID, List<String>>)[gameContext!!.playerId] as Any
+            p=(param as LinkedTreeMap<String, ArrayList<String>>)[gameContext!!.playerId.toString()] as Any//HashMap<UUID, List<String>>
         for(listener in listeners)
-            listener.Interaction(action, param)
+            listener.Interaction(action, p)
     }
 
     inner class MyBinder : Binder() {
@@ -84,11 +85,16 @@ class  ServerService: Service() {
     fun sendNickName(nickname:String){
         hubConnection.send("SetPlayerNickName", gameContext, nickname)
     }
-    fun SetArt(draw : ByteArray){
-        hubConnection.send("SetArt", gameContext, draw)
+    fun SetArt(draw : String){
+        if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
+            hubConnection.start()
+        hubConnection.send("SetArt", gameContext, draw)//"https://i.imgur.com/O54cqIc.jpg")
     }
     fun Ready() {
         hubConnection.send("Ready", gameContext)
+    }
+    fun sendGuess(guess:String) {
+        hubConnection.send("SendGuess", gameContext, guess)
     }
 }
 

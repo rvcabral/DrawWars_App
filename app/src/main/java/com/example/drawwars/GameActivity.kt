@@ -15,16 +15,7 @@ import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.os.Handler
 import com.example.drawwars.services.ServerService
-import android.support.v4.os.HandlerCompat.postDelayed
-import android.support.v4.app.BundleCompat.getBinder
-import android.support.v4.app.FragmentActivity
-import android.util.Log
-import com.example.drawwars.services.ServerService.MyBinder
-import android.content.Context.BIND_AUTO_CREATE
 import android.content.Intent
-import android.graphics.Bitmap
-import android.opengl.Visibility
-import android.support.v4.app.BundleCompat.getBinder
 import android.widget.Button
 import com.example.drawwars.services.ServiceListener
 import android.util.DisplayMetrics
@@ -37,6 +28,7 @@ class GameActivity : AppCompatActivity(), ServiceListener {
 
     private var service: ServerService? = null
     private var mViewModel: ServiceViewModel? = null
+    private var canvas :DWCanvas?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +46,18 @@ class GameActivity : AppCompatActivity(), ServiceListener {
 
         })
         ReadyButton.setOnClickListener { service!!.Ready() }
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val height = displayMetrics.heightPixels
+        val width = displayMetrics.widthPixels
+        canvas = DWCanvas(this, height, width);
+        canvasLayout.addView(canvas)
+        canvasLayout.isEnabled = false
+        submitDraw.setOnClickListener {
+
+            service!!.SetArt(canvas!!.getDraw())
+        }
+
     }
 
 
@@ -92,24 +96,16 @@ class GameActivity : AppCompatActivity(), ServiceListener {
 
 
     override fun Interaction(action: String, param: Any?) {
-        val themes = param as List<String>
+        val themes = param as ArrayList<String>
         when (action){
-            "AckNickname"->{
+            "DrawThemes"->{
                 captionTextView.text = themes[0];
 
-                val displayMetrics = DisplayMetrics()
-                windowManager.defaultDisplay.getMetrics(displayMetrics)
-                val height = displayMetrics.heightPixels
-                val width = displayMetrics.widthPixels
-                val canvas = DWCanvas(this, height, width);
-                canvasLayout.addView(canvas)
+
                 ReadyButton.visibility=Button.INVISIBLE
                 submitDraw.visibility=Button.VISIBLE
 
-                submitDraw.setOnClickListener {
-
-                    service!!.SetArt(canvas.getDraw())
-                }
+                canvasLayout.isEnabled = true
             }
         }
     }

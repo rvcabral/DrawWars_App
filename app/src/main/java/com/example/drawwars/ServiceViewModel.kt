@@ -38,7 +38,7 @@ class ServiceViewModel : ViewModel() {
 
 
     fun getServiceConnection(): ServiceConnection {
-        return serviceConnection
+            return serviceConnection
     }
 
     fun getBinder(): LiveData<ServerService.MyBinder> {
