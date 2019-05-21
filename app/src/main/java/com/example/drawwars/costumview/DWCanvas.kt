@@ -63,7 +63,6 @@ class DWCanvas(context: Context?, height:Int, width:Int ) : View(context) {
          bitmap!!.compress(Bitmap.CompressFormat.PNG, 100, stream)
          val byteArray = stream.toByteArray()
          val encodedImage = Base64.encodeToString(byteArray, Base64.DEFAULT)
-         val s = String(byteArray)
-         return s
+         return encodedImage
     }
 }

@@ -13,8 +13,6 @@
             android:theme="@style/AppTheme">
         <activity android:name=".GameCycleActivity">
         </activity>
-        <activity android:name=".StandByActivity">
-        </activity>
         <activity android:name=".GameActivity">
         </activity>
         <activity

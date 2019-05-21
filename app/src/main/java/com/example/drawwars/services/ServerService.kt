@@ -8,9 +8,12 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import com.example.drawwars.utils.HandShakeResult
+import com.google.gson.JsonParser
+import com.google.gson.JsonSerializer
 import com.google.gson.internal.LinkedTreeMap
 import com.microsoft.signalr.HubConnectionBuilder
 import com.microsoft.signalr.HubConnectionState
+import khttp.async
 import java.util.*
 import java.util.function.Consumer
 import kotlin.collections.ArrayList
@@ -22,6 +25,7 @@ class  ServerService: Service() {
     val binder : IBinder = MyBinder()
     var handler: Handler? = null
     val hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5000/Server").build()
+    val apiUrl = "http://10.0.2.2:5000/api/drawing/"
     val ctx = this
     var connected = false
     var gameContext:HandShakeResult?=null
@@ -88,7 +92,10 @@ class  ServerService: Service() {
     fun SetArt(draw : String){
         if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
             hubConnection.start()
-        hubConnection.send("SetArt", gameContext, draw)//"https://i.imgur.com/O54cqIc.jpg")
+
+        var body = "{ \"SessionId\" : \"${gameContext!!.session}\", \"PlayerId\" : \"${gameContext!!.playerId}\",\"Extension\" : \"PNG\",\"Drawing\" : \"${draw}\"}"
+
+        var res = khttp.async.post(apiUrl +"submit", headers = mapOf("Content-Type" to "application/json"), data = body)
     }
     fun Ready() {
         hubConnection.send("Ready", gameContext)

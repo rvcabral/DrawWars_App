@@ -37,6 +37,8 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'com.microsoft.signalr:signalr:1.0.0'
 
+    implementation 'khttp:khttp:1.0.0'
+
     def archLifeCycleVersion = "1.1.1"
     implementation "android.arch.lifecycle:extensions:$archLifeCycleVersion"
     annotationProcessor "android.arch.lifecycle:compiler:$archLifeCycleVersion"
