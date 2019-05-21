@@ -95,7 +95,11 @@ class  ServerService: Service() {
 
         var body = "{ \"SessionId\" : \"${gameContext!!.session}\", \"PlayerId\" : \"${gameContext!!.playerId}\",\"Extension\" : \"PNG\",\"Drawing\" : \"${draw}\"}"
 
-        var res = khttp.async.post(apiUrl +"submit", headers = mapOf("Content-Type" to "application/json"), data = body)
+        var res = khttp.async.post(apiUrl +"submit", headers = mapOf("Content-Type" to "application/json"), data = body, onResponse = {
+            if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
+                hubConnection.start()
+            hubConnection.send("DrawSubmitted", gameContext)
+        })
     }
     fun Ready() {
         hubConnection.send("Ready", gameContext)
