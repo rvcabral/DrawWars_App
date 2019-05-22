@@ -38,7 +38,6 @@ class  ServerService: Service() {
         super.onCreate()
         handler = Handler()
         hubConnection.start()
-
         if(hubConnection.connectionState == HubConnectionState.CONNECTED){
             connected = true;
         }
@@ -84,14 +83,10 @@ class  ServerService: Service() {
     }
 
     fun Inlist(room:String){
-        if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
-            hubConnection.start()
         hubConnection.send("Inlist", room)
     }
 
     fun sendNickName(nickname:String){
-        if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
-            hubConnection.start()
         hubConnection.send("SetPlayerNickName", gameContext, nickname)
     }
     fun SetArt(draw : String){
@@ -100,18 +95,12 @@ class  ServerService: Service() {
 
         var body = "{ \"SessionId\" : \"${gameContext!!.session}\", \"PlayerId\" : \"${gameContext!!.playerId}\",\"Extension\" : \"PNG\",\"Drawing\" : \"${draw}\"}"
 
-        var res = khttp.async.post(apiUrl +"submit", headers = mapOf("Content-Type" to "application/json"), data = body, onResponse = {
-            hubConnection.send()
-        })
+        var res = khttp.async.post(apiUrl +"submit", headers = mapOf("Content-Type" to "application/json"), data = body)
     }
     fun Ready() {
-        if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
-            hubConnection.start()
         hubConnection.send("Ready", gameContext)
     }
     fun sendGuess(guess:String) {
-        if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
-            hubConnection.start()
         hubConnection.send("SendGuess", gameContext, guess)
     }
 }
