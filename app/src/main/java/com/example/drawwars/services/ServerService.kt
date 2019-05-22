@@ -45,7 +45,13 @@ class  ServerService: Service() {
         hubConnection.on("AckSession", { x-> gameContext = HandShakeResult(x.session,x.playerId );notifyListeners("AckSession",null)  }, HandShakeResult::class.java)
         hubConnection.on("AckNickname", {notifyListeners("AckNickname",null)})
         hubConnection.on("NonExistingSession",{uid->notifyListeners("NonExistingSession",uid)}, UUID::class.java)
-        hubConnection.on("DrawThemes", {m -> notifyListeners("DrawThemes",m ) }, Any::class.java)//as HashMap<UUID, List<String>>
+        hubConnection.on("DrawThemes",  {m -> notifyListeners("DrawThemes",m ) }, Any::class.java)//as HashMap<UUID, List<String>>
+        hubConnection.on("TryAndGuess", {m->notifyListeners("TryAndGuess",m)}, Any::class.java)
+        hubConnection.on("StandBy",     {m->notifyListeners("StandBy",m)}, Any::class.java)
+        hubConnection.on("WrongGuess",  {m->notifyListeners("WrongGuess",m)}, Any::class.java)
+        hubConnection.on("RightGuess",  {m->notifyListeners("RightGuess",m)}, Any::class.java)
+        hubConnection.on("SeeResults",  {m->notifyListeners("SeeResults",m)}, Any::class.java)
+        hubConnection.on("EndOfGame",   {m->notifyListeners("EndOfGame",m)}, Any::class.java)
 
     }
 
@@ -83,24 +89,37 @@ class  ServerService: Service() {
     }
 
     fun Inlist(room:String){
+
         hubConnection.send("Inlist", room)
     }
 
     fun sendNickName(nickname:String){
+        if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
+            hubConnection.start()
         hubConnection.send("SetPlayerNickName", gameContext, nickname)
     }
-    fun SetArt(draw : String){
+    fun SetArt(draw : String, theme:String){
         if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
             hubConnection.start()
 
-        var body = "{ \"SessionId\" : \"${gameContext!!.session}\", \"PlayerId\" : \"${gameContext!!.playerId}\",\"Extension\" : \"PNG\",\"Drawing\" : \"${draw}\"}"
+        var body = "{ \"SessionId\" : \"${gameContext!!.session}\", \"PlayerId\" : \"${gameContext!!.playerId}\",\"Extension\" : \"PNG\",\"Drawing\" : \"${draw}\", \"Theme\" : \"${theme}\"}"
 
-        var res = khttp.async.post(apiUrl +"submit", headers = mapOf("Content-Type" to "application/json"), data = body)
+        var res = khttp.async.post(apiUrl +"submit", headers = mapOf("Content-Type" to "application/json"), data = body, onResponse = {
+            if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
+                hubConnection.start()
+            hubConnection.send("DrawSubmitted", gameContext)
+            for(listener in listeners)
+                listener.Interaction("StandBy","")
+        })
     }
     fun Ready() {
+        if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
+            hubConnection.start()
         hubConnection.send("Ready", gameContext)
     }
     fun sendGuess(guess:String) {
+        if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
+            hubConnection.start()
         hubConnection.send("SendGuess", gameContext, guess)
     }
 }

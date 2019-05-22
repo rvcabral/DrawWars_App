@@ -45,14 +45,6 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
                 }
             }
         })
-
-        SubmitButton.setOnClickListener {
-                b->
-            if(CodeInput.text.isNotEmpty()){
-                service?.Inlist(CodeInput.text.toString())
-            }
-
-        }
     }
 
     override fun Interaction(action: String, param: Any?) {

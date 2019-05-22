@@ -19,8 +19,7 @@ import android.content.Intent
 import android.widget.Button
 import com.example.drawwars.services.ServiceListener
 import android.util.DisplayMetrics
-
-
+import android.widget.FrameLayout
 
 
 class GameActivity : AppCompatActivity(), ServiceListener {
@@ -29,13 +28,14 @@ class GameActivity : AppCompatActivity(), ServiceListener {
     private var service: ServerService? = null
     private var mViewModel: ServiceViewModel? = null
     private var canvas :DWCanvas?=null
+    private var theme :String="";
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
 
         captionTextView.text = "Aguarde pelos outros jogadores"
-        submitDraw.visibility=Button.INVISIBLE
+        submitButton.visibility=Button.INVISIBLE
         mViewModel = ViewModelProviders.of(this).get(ServiceViewModel::class.java!!)
         mViewModel?.getBinder()?.observe(this, object: Observer<ServerService.MyBinder> {
             override fun onChanged(binder: ServerService.MyBinder?) {
@@ -47,15 +47,16 @@ class GameActivity : AppCompatActivity(), ServiceListener {
         })
         ReadyButton.setOnClickListener { service!!.Ready() }
         val displayMetrics = DisplayMetrics()
+        canvasLayout.visibility = FrameLayout.INVISIBLE
         windowManager.defaultDisplay.getMetrics(displayMetrics)
         val height = displayMetrics.heightPixels
         val width = displayMetrics.widthPixels
         canvas = DWCanvas(this, height, width);
         canvasLayout.addView(canvas)
         canvasLayout.isEnabled = false
-        submitDraw.setOnClickListener {
+        submitButton.setOnClickListener {
 
-            service!!.SetArt(canvas!!.getDraw())
+            service!!.SetArt(canvas!!.getDraw(), theme)
         }
 
     }
@@ -96,16 +97,26 @@ class GameActivity : AppCompatActivity(), ServiceListener {
 
 
     override fun Interaction(action: String, param: Any?) {
-        val themes = param as ArrayList<String>
+
         when (action){
             "DrawThemes"->{
-                captionTextView.text = themes[0];
+                runOnUiThread({
+                    val themes = param as ArrayList<String>
+                    theme = themes[0]
+                    captionTextView.text = themes[0]
 
 
-                ReadyButton.visibility=Button.INVISIBLE
-                submitDraw.visibility=Button.VISIBLE
+                    ReadyButton.visibility=Button.INVISIBLE
+                    submitButton.visibility=Button.VISIBLE
 
-                canvasLayout.isEnabled = true
+                    canvasLayout.isEnabled = true
+                    canvasLayout.visibility = FrameLayout.VISIBLE
+                })
+            }
+            "StandBy"->{
+                runOnUiThread({
+                    startActivity(Intent(this@GameActivity, GameCycleActivity::class.java))
+                })
             }
         }
     }
