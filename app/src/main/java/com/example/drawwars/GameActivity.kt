@@ -100,7 +100,7 @@ class GameActivity : AppCompatActivity(), ServiceListener {
 
         when (action){
             "DrawThemes"->{
-                runOnUiThread({
+                runOnUiThread{
                     val themes = param as ArrayList<String>
                     theme = themes[0]
                     captionTextView.text = themes[0]
@@ -111,12 +111,13 @@ class GameActivity : AppCompatActivity(), ServiceListener {
 
                     canvasLayout.isEnabled = true
                     canvasLayout.visibility = FrameLayout.VISIBLE
-                })
+                }
             }
             "StandBy"->{
-                runOnUiThread({
+                runOnUiThread{
                     startActivity(Intent(this@GameActivity, GameCycleActivity::class.java))
-                })
+                    finish()
+                }
             }
         }
     }

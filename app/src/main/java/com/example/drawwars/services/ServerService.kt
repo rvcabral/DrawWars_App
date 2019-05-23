@@ -46,12 +46,12 @@ class  ServerService: Service() {
         hubConnection.on("AckNickname", {notifyListeners("AckNickname",null)})
         hubConnection.on("NonExistingSession",{uid->notifyListeners("NonExistingSession",uid)}, UUID::class.java)
         hubConnection.on("DrawThemes",  {m -> notifyListeners("DrawThemes",m ) }, Any::class.java)//as HashMap<UUID, List<String>>
-        hubConnection.on("TryAndGuess", {m->notifyListeners("TryAndGuess",m)}, Any::class.java)
-        hubConnection.on("StandBy",     {m->notifyListeners("StandBy",m)}, Any::class.java)
-        hubConnection.on("WrongGuess",  {m->notifyListeners("WrongGuess",m)}, Any::class.java)
-        hubConnection.on("RightGuess",  {m->notifyListeners("RightGuess",m)}, Any::class.java)
-        hubConnection.on("SeeResults",  {m->notifyListeners("SeeResults",m)}, Any::class.java)
-        hubConnection.on("EndOfGame",   {m->notifyListeners("EndOfGame",m)}, Any::class.java)
+        hubConnection.on("TryAndGuess", {notifyListeners("TryAndGuess",null)})
+        hubConnection.on("StandBy",     {notifyListeners("StandBy",null)})
+        hubConnection.on("WrongGuess",  {notifyListeners("WrongGuess",null)})
+        hubConnection.on("RightGuess",  {notifyListeners("RightGuess",null)})
+        hubConnection.on("SeeResults",  {notifyListeners("SeeResults",null)})
+        hubConnection.on("EndOfGame",   {notifyListeners("EndOfGame",null)})
 
     }
 
@@ -118,7 +118,7 @@ class  ServerService: Service() {
         hubConnection.send("Ready", gameContext)
     }
     fun sendGuess(guess:String) {
-        if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
+        while(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
             hubConnection.start()
         hubConnection.send("SendGuess", gameContext, guess)
     }

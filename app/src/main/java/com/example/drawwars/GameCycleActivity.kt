@@ -50,38 +50,52 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
     override fun Interaction(action: String, param: Any?) {
         when (action){
             "TryAndGuess"-> {
-                guessTextBox.text.clear()
-                guessTextBox.visibility = EditText.VISIBLE
-                sendGuessButton.visibility = Button.VISIBLE
-                titleTextView.text = TryandguessTitle
+                runOnUiThread{
+                    guessTextBox.text.clear()
+                    guessTextBox.visibility = EditText.VISIBLE
+                    sendGuessButton.visibility = Button.VISIBLE
+                    titleTextView.text = TryandguessTitle
+                }
             }
             "StandBy"->{
-                guessTextBox.text.clear()
-                guessTextBox.visibility = EditText.INVISIBLE
-                sendGuessButton.visibility = Button.INVISIBLE
-                titleTextView.text = StandbyTitle
+                runOnUiThread {
+                    guessTextBox.text.clear()
+                    guessTextBox.visibility = EditText.INVISIBLE
+                    sendGuessButton.visibility = Button.INVISIBLE
+                    titleTextView.text = StandbyTitle
+                }
             }
             "WrongGuess"->{
-                guessTextBox.text.clear()
-                Toast.makeText(this, "Wrong Guess. Try again!", Toast.LENGTH_LONG)
+                runOnUiThread {
+                    guessTextBox.text.clear()
+                    Toast.makeText(this@GameCycleActivity, "Wrong Guess. Try again!", Toast.LENGTH_LONG).show()
+                }
             }
             "RightGuess"->{
-                guessTextBox.text.clear()
-                guessTextBox.visibility = EditText.INVISIBLE
-                sendGuessButton.visibility = Button.INVISIBLE
-                titleTextView.text = StandbyTitle
-                Toast.makeText(this, "You got it right!", Toast.LENGTH_LONG)
+                runOnUiThread {
+                    guessTextBox.text.clear()
+                    guessTextBox.visibility = EditText.INVISIBLE
+                    sendGuessButton.visibility = Button.INVISIBLE
+                    titleTextView.text = StandbyTitle
+                    Toast.makeText(this@GameCycleActivity, "You got it right!", Toast.LENGTH_LONG).show()
+                }
+
             }
+
             "SeeResults"->{
-                guessTextBox.text.clear()
-                guessTextBox.visibility = EditText.INVISIBLE
-                sendGuessButton.visibility = Button.INVISIBLE
-                titleTextView.text = EndOfRoundTitle
+                runOnUiThread {
+                    guessTextBox.text.clear()
+                    guessTextBox.visibility = EditText.INVISIBLE
+                    sendGuessButton.visibility = Button.INVISIBLE
+                    titleTextView.text = EndOfRoundTitle
+                }
             }
             "EndOfGame"->{
-                this.
-                startActivity(Intent(this, MainActivity::class.java))
-                finish()
+                runOnUiThread {
+                    this.
+                        startActivity(Intent(this@GameCycleActivity, MainActivity::class.java))
+                    finish()
+                }
             }
         }
     }
