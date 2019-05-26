@@ -79,7 +79,6 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
                     titleTextView.text = StandbyTitle
                     Toast.makeText(this@GameCycleActivity, "You got it right!", Toast.LENGTH_LONG).show()
                 }
-
             }
 
             "SeeResults"->{

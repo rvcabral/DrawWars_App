@@ -122,6 +122,9 @@ class GameActivity : AppCompatActivity(), ServiceListener {
                     finish()
                 }
             }
+            "TimesUp"->{
+                service!!.SetArt(canvas!!.getDraw(), theme)
+            }
         }
     }
 

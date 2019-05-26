@@ -53,21 +53,17 @@ class  ServerService: Service() {
         hubConnection.on("RightGuess",  {notifyListeners("RightGuess",null)})
         hubConnection.on("SeeResults",  {notifyListeners("SeeResults",null)})
         hubConnection.on("EndOfGame",   {notifyListeners("EndOfGame",null)})
+        hubConnection.on("TimesUp",   {notifyListeners("TimesUp",null)})
+
 
     }
 
 
     private fun notifyListeners(action:String, param:Any?) {
         var p = param
-        if(action=="DrawThemes"){
-            var aux = ThemeTimeoutWrapper((param as LinkedTreeMap<String, LinkedTreeMap<String, ArrayList<String>>>)["themes"],
-                (param as LinkedTreeMap<String, String>)["timeout"])
-            var x = {
-                val timeout = aux.timeout
-                val themes = aux.themes!![gameContext!!.playerId.toString()] as  ArrayList<String>
-            }
-            p = x
-        }
+        if(action=="DrawThemes")
+            p = (param as LinkedTreeMap<String, ArrayList<String>>)["themes"]
+
         for(listener in listeners)
             listener.Interaction(action, p)
     }
@@ -97,7 +93,8 @@ class  ServerService: Service() {
     }
 
     fun Inlist(room:String){
-
+        if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
+            hubConnection.start()
         hubConnection.send("Inlist", room)
     }
 
@@ -125,6 +122,7 @@ class  ServerService: Service() {
             hubConnection.start()
         hubConnection.send("Ready", gameContext)
     }
+
     fun sendGuess(guess:String) {
         while(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
             hubConnection.start()
