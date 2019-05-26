@@ -8,6 +8,7 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import com.example.drawwars.utils.HandShakeResult
+import com.example.drawwars.utils.ThemeTimeoutWrapper
 import com.google.gson.JsonParser
 import com.google.gson.JsonSerializer
 import com.google.gson.internal.LinkedTreeMap
@@ -58,8 +59,15 @@ class  ServerService: Service() {
 
     private fun notifyListeners(action:String, param:Any?) {
         var p = param
-        if(action=="DrawThemes")
-            p=(param as LinkedTreeMap<String, ArrayList<String>>)[gameContext!!.playerId.toString()] as Any//HashMap<UUID, List<String>>
+        if(action=="DrawThemes"){
+            var aux = ThemeTimeoutWrapper((param as LinkedTreeMap<String, LinkedTreeMap<String, ArrayList<String>>>)["themes"],
+                (param as LinkedTreeMap<String, String>)["timeout"])
+            var x = {
+                val timeout = aux.timeout
+                val themes = aux.themes!![gameContext!!.playerId.toString()] as  ArrayList<String>
+            }
+            p = x
+        }
         for(listener in listeners)
             listener.Interaction(action, p)
     }

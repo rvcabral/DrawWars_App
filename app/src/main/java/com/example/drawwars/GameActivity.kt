@@ -20,6 +20,7 @@ import android.widget.Button
 import com.example.drawwars.services.ServiceListener
 import android.util.DisplayMetrics
 import android.widget.FrameLayout
+import com.example.drawwars.utils.ThemeTimeoutWrapper
 
 
 class GameActivity : AppCompatActivity(), ServiceListener {
@@ -101,9 +102,11 @@ class GameActivity : AppCompatActivity(), ServiceListener {
         when (action){
             "DrawThemes"->{
                 runOnUiThread{
-                    val themes = param as ArrayList<String>
-                    theme = themes[0]
-                    captionTextView.text = themes[0]
+                    //val themes = (param as ThemeTimeoutWrapper).themes as ArrayList<String>
+                    theme = "Flying Car"
+                        //themes[0]
+                    captionTextView.text = "Flying Car"
+                        //themes[0]
 
 
                     ReadyButton.visibility=Button.INVISIBLE
