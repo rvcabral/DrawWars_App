@@ -58,15 +58,15 @@ class  ServerService: Service() {
 
     }
 
+ //region Socket Interface
+ private fun notifyListeners(action:String, param:Any?) {
+     var p = param
+     if(action=="DrawThemes")
+         p = (param as LinkedTreeMap<String, ArrayList<String>>)["themes"]
 
-    private fun notifyListeners(action:String, param:Any?) {
-        var p = param
-        if(action=="DrawThemes")
-            p = (param as LinkedTreeMap<String, ArrayList<String>>)["themes"]
-
-        for(listener in listeners)
-            listener.Interaction(action, p)
-    }
+     for(listener in listeners)
+         listener.Interaction(action, p)
+ }
 
     inner class MyBinder : Binder() {
         fun getService() : ServerService{
@@ -128,5 +128,7 @@ class  ServerService: Service() {
             hubConnection.start()
         hubConnection.send("SendGuess", gameContext, guess)
     }
+//endregion
+
 }
 

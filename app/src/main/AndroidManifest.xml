@@ -11,20 +11,24 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".GameCycleActivity">
+        <activity android:name=".GameCycleActivity"
+                  android:screenOrientation="portrait">
         </activity>
-        <activity android:name=".GameActivity">
+        <activity android:name=".GameActivity"
+                  android:screenOrientation="portrait">
         </activity>
         <activity
                 android:name=".SetupActivity"
                 android:label="@string/title_activity_setup"
                 android:parentActivityName=".MainActivity"
-                android:theme="@style/AppTheme.NoActionBar">
+                android:theme="@style/AppTheme.NoActionBar"
+                android:screenOrientation="portrait">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value="com.example.drawwars.MainActivity"/>
         </activity>
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+                  android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
