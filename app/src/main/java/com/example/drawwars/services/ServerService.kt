@@ -25,8 +25,8 @@ class  ServerService: Service() {
     private var listeners : List<ServiceListener> = ArrayList<ServiceListener>()
     val binder : IBinder = MyBinder()
     var handler: Handler? = null
-    val hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5000/Server").build()
-    val apiUrl = "http://10.0.2.2:5000/api/drawing/"
+    val hubConnection = HubConnectionBuilder.create("http://52.211.139.236/DrawWars/Server").build()
+    val apiUrl = "http://52.211.139.236/api/drawing/"
     val ctx = this
     var connected = false
     var gameContext:HandShakeResult?=null
