@@ -58,6 +58,9 @@ class GameActivity : AppCompatActivity(), ServiceListener {
         submitButton.setOnClickListener {
 
             service!!.SetArt(canvas!!.getDraw(), theme)
+            runOnUiThread {
+                submitButton.isEnabled = false
+            }
         }
 
     }
@@ -102,10 +105,10 @@ class GameActivity : AppCompatActivity(), ServiceListener {
         when (action){
             "DrawThemes"->{
                 runOnUiThread{
-                    //val themes = (param as ThemeTimeoutWrapper).themes as ArrayList<String>
-                    theme = "Flying Car"
+                    val receivedTheme = (param as ArrayList<String>)[0]
+                    theme = receivedTheme
                         //themes[0]
-                    captionTextView.text = "Flying Car"
+                    captionTextView.text = receivedTheme
                         //themes[0]
 
 

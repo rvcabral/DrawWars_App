@@ -25,8 +25,10 @@ class  ServerService: Service() {
     private var listeners : List<ServiceListener> = ArrayList<ServiceListener>()
     val binder : IBinder = MyBinder()
     var handler: Handler? = null
+    //val hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5000/Server").build()
+    //val apiUrl = "http://10.0.2.2:5000/api/drawing/"
     val hubConnection = HubConnectionBuilder.create("http://52.211.139.236/DrawWars/Server").build()
-    val apiUrl = "http://52.211.139.236/api/drawing/"
+    val apiUrl = "http://52.211.139.236/DrawWars/api/drawing/"
     val ctx = this
     var connected = false
     var gameContext:HandShakeResult?=null
@@ -62,7 +64,7 @@ class  ServerService: Service() {
  private fun notifyListeners(action:String, param:Any?) {
      var p = param
      if(action=="DrawThemes")
-         p = (param as LinkedTreeMap<String, ArrayList<String>>)["themes"]
+         p = (param as LinkedTreeMap<String, ArrayList<String>>)[gameContext!!.playerId.toString()]
 
      for(listener in listeners)
          listener.Interaction(action, p)
@@ -114,7 +116,7 @@ class  ServerService: Service() {
                 hubConnection.start()
             hubConnection.send("DrawSubmitted", gameContext)
             for(listener in listeners)
-                listener.Interaction("StandBy","")
+                listener.Interaction("WaitForOtherPlayers","")
         })
     }
     fun Ready() {

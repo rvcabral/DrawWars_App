@@ -19,7 +19,8 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
 
     private var mViewModel: ServiceViewModel? = null
     private var service: ServerService? = null
-    private val StandbyTitle = "Please wait for the other players.."
+    private val StandbyTitle = "Your Draw Is Being Shown!"
+    private val WaitForOtherPlayersTitle = "Please wait for the other players.."
     private val TryandguessTitle = "Time to Guess!"
     private val EndOfRoundTitle = "Round ended"
 
@@ -63,6 +64,14 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
                     guessTextBox.visibility = EditText.INVISIBLE
                     sendGuessButton.visibility = Button.INVISIBLE
                     titleTextView.text = StandbyTitle
+                }
+            }
+            "WaitForOtherPlayers"->{
+                runOnUiThread {
+                    guessTextBox.text.clear()
+                    guessTextBox.visibility = EditText.INVISIBLE
+                    sendGuessButton.visibility = Button.INVISIBLE
+                    titleTextView.text = WaitForOtherPlayersTitle
                 }
             }
             "WrongGuess"->{

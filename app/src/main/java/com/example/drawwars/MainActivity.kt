@@ -12,6 +12,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import com.example.drawwars.services.ServerService.MyBinder
 import android.support.v4.app.BundleCompat.getBinder
 import android.util.Log
+import android.widget.Toast
 import com.example.drawwars.services.ServiceListener
 
 
@@ -22,6 +23,11 @@ class MainActivity : AppCompatActivity(), ServiceListener {
             "AckSession"->{
                 val intent = Intent(this, SetupActivity::class.java)
                 startActivity(intent)
+            }
+            "NonExistingSession" -> {
+                runOnUiThread{
+                    Toast.makeText(this@MainActivity, "Invalid Room Code", Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
