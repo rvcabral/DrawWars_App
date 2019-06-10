@@ -119,7 +119,7 @@ class GameActivity : AppCompatActivity(), ServiceListener {
                     canvasLayout.visibility = FrameLayout.VISIBLE
                 }
             }
-            "StandBy"->{
+            "DrawSubmitted"->{
                 runOnUiThread{
                     startActivity(Intent(this@GameActivity, GameCycleActivity::class.java))
                     finish()

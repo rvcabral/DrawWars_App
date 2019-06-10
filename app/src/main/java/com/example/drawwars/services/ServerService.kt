@@ -116,7 +116,7 @@ class  ServerService: Service() {
                 hubConnection.start()
             hubConnection.send("DrawSubmitted", gameContext)
             for(listener in listeners)
-                listener.Interaction("WaitForOtherPlayers","")
+                listener.Interaction("DrawSubmitted","")
         })
     }
     fun Ready() {
