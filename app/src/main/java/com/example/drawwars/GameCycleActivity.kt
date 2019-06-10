@@ -36,7 +36,7 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
             override fun onChanged(binder: ServerService.MyBinder?) {
                 service = binder?.getService()
                 service?.listen(this@GameCycleActivity)
-                titleTextView.text=StandbyTitle
+                titleTextView.text=WaitForOtherPlayersTitle
                 guessTextBox.visibility = EditText.INVISIBLE
                 sendGuessButton.visibility = Button.INVISIBLE
                 sendGuessButton.setOnClickListener {
