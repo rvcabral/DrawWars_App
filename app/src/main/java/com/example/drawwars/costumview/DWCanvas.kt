@@ -28,6 +28,7 @@ class DWCanvas(context: Context?, height:Int, width:Int ) : View(context) {
         brush.strokeWidth = 10f
         //bitmap = Bitmap.createBitmap(height, width,Bitmap.Config.ALPHA_8)
         //myCanvas=Canvas(bitmap);
+
         isDrawingCacheEnabled =true
         buildDrawingCache(true)
 
@@ -63,6 +64,7 @@ class DWCanvas(context: Context?, height:Int, width:Int ) : View(context) {
          bitmap!!.compress(Bitmap.CompressFormat.PNG, 100, stream)
          val byteArray = stream.toByteArray()
          val encodedImage = Base64.encodeToString(byteArray, Base64.DEFAULT)
+         drawingCache.recycle()
          return encodedImage
     }
 }
