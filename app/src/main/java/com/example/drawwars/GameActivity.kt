@@ -35,7 +35,12 @@ class GameActivity : AppCompatActivity(), ServiceListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
 
-        captionTextView.text = "Aguarde pelos outros jogadores"
+        var wasEndOfRound = intent.extras["EndOfRound"]
+        if(wasEndOfRound!=null && wasEndOfRound as Boolean){
+            ReadyButton.visibility=Button.INVISIBLE
+        }
+
+        captionTextView.text = "Aguarde ;)"
         submitButton.visibility=Button.INVISIBLE
         mViewModel = ViewModelProviders.of(this).get(ServiceViewModel::class.java!!)
         mViewModel?.getBinder()?.observe(this, object: Observer<ServerService.MyBinder> {
@@ -122,6 +127,7 @@ class GameActivity : AppCompatActivity(), ServiceListener {
             "DrawSubmitted"->{
                 runOnUiThread{
                     startActivity(Intent(this@GameActivity, GameCycleActivity::class.java))
+                    service!!.mute(this);
                     finish()
                 }
             }

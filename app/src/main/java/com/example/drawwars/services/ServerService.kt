@@ -56,6 +56,8 @@ class  ServerService: Service() {
         hubConnection.on("SeeResults",  {notifyListeners("SeeResults",null)})
         hubConnection.on("EndOfGame",   {notifyListeners("EndOfGame",null)})
         hubConnection.on("TimesUp",   {notifyListeners("TimesUp",null)})
+        hubConnection.on("NextRound",   {notifyListeners("NextRound",null)})
+
 
 
     }

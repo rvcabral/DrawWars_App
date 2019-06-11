@@ -100,15 +100,17 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
             }
             "NextRound"->{
                 runOnUiThread {
-                    this.
-                        startActivity(Intent(this@GameCycleActivity, GameActivity::class.java))
+                    var activityIntent = Intent(this@GameCycleActivity, GameActivity::class.java)
+                    activityIntent.putExtra("EndOfRound", true)
+                    this.startActivity(activityIntent)
+                    service!!.mute(this);
                     finish()
                 }
             }
             "EndOfGame"->{
                 runOnUiThread {
-                    this.
-                        startActivity(Intent(this@GameCycleActivity, MainActivity::class.java))
+                    this.startActivity(Intent(this@GameCycleActivity, MainActivity::class.java))
+                    service!!.mute(this);
                     finish()
                 }
             }
