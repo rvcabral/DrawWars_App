@@ -35,8 +35,7 @@ class GameActivity : AppCompatActivity(), ServiceListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
 
-        var wasEndOfRound = intent.extras["EndOfRound"]
-        if(wasEndOfRound!=null && wasEndOfRound as Boolean){
+        if(intent.extras!=null && intent.extras["EndOfRound"]!=null && intent.extras["EndOfRound"] as Boolean){
             ReadyButton.visibility=Button.INVISIBLE
         }
 
