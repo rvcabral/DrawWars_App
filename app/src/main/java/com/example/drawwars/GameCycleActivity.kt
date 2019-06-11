@@ -98,6 +98,13 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
                     titleTextView.text = EndOfRoundTitle
                 }
             }
+            "NextRound"->{
+                runOnUiThread {
+                    this.
+                        startActivity(Intent(this@GameCycleActivity, GameActivity::class.java))
+                    finish()
+                }
+            }
             "EndOfGame"->{
                 runOnUiThread {
                     this.
