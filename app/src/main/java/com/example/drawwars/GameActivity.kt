@@ -16,11 +16,15 @@ import android.content.Context
 import android.os.Handler
 import com.example.drawwars.services.ServerService
 import android.content.Intent
+import android.graphics.Bitmap
+import android.util.Base64
 import android.widget.Button
 import com.example.drawwars.services.ServiceListener
 import android.util.DisplayMetrics
+import android.view.View
 import android.widget.FrameLayout
 import com.example.drawwars.utils.ThemeTimeoutWrapper
+import java.io.ByteArrayOutputStream
 
 
 class GameActivity : AppCompatActivity(), ServiceListener {
@@ -30,6 +34,8 @@ class GameActivity : AppCompatActivity(), ServiceListener {
     private var mViewModel: ServiceViewModel? = null
     private var canvas :DWCanvas?=null
     private var theme :String="";
+    private var Height :Int=0
+    private var Width :Int=0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,14 +60,14 @@ class GameActivity : AppCompatActivity(), ServiceListener {
         val displayMetrics = DisplayMetrics()
         canvasLayout.visibility = FrameLayout.INVISIBLE
         windowManager.defaultDisplay.getMetrics(displayMetrics)
-        val height = displayMetrics.heightPixels
-        val width = displayMetrics.widthPixels
-        canvas = DWCanvas(this, height, width);
+        Height = displayMetrics.heightPixels
+        Width = displayMetrics.widthPixels
+        canvas = DWCanvas(this, Height, Width);
         canvasLayout.addView(canvas)
         canvasLayout.isEnabled = false
         submitButton.setOnClickListener {
 
-            service!!.SetArt(canvas!!.getDraw(), theme)
+            service!!.SetArt(getDrawFromView()!!, theme)
             runOnUiThread {
                 submitButton.isEnabled = false
             }
@@ -84,6 +90,10 @@ class GameActivity : AppCompatActivity(), ServiceListener {
         startService()
     }
 
+    override fun onRestart() {
+        super.onRestart()
+        canvas = DWCanvas(this, Height, Width);
+    }
 
     override fun onStop() {
         super.onStop()
@@ -131,13 +141,15 @@ class GameActivity : AppCompatActivity(), ServiceListener {
                 }
             }
             "TimesUp"->{
-                service!!.SetArt(canvas!!.getDraw(), theme)
+                service!!.SetArt(getDrawFromView()!!, theme)
             }
         }
     }
 
 
-
+    private fun getDrawFromView():String?{
+        return canvas?.getDraw()
+    }
 
     //endregion
 

@@ -9,17 +9,17 @@ import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
 import com.microsoft.signalr.HubConnectionState
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
+import android.media.MediaExtractor
 import android.util.Base64
 import java.io.ByteArrayOutputStream
 
 
 class DWCanvas(context: Context?, height:Int, width:Int ) : View(context) {
     private val path = Path()
-    //private var myCanvas : Canvas?=null
     val brush = Paint()
-
-    //private var bitmap: Bitmap?=null
-
+    var mBitmap:Bitmap? = null
+    var mCanvas : Canvas? = null
     init {
         brush.isAntiAlias = false
         brush.color = Color.BLUE
@@ -29,9 +29,16 @@ class DWCanvas(context: Context?, height:Int, width:Int ) : View(context) {
         //bitmap = Bitmap.createBitmap(height, width,Bitmap.Config.ALPHA_8)
         //myCanvas=Canvas(bitmap);
 
-        isDrawingCacheEnabled =true
-        buildDrawingCache(true)
+        //isDrawingCacheEnabled =true
+        //buildDrawingCache(true)
 
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        mCanvas = Canvas(mBitmap)
+        mCanvas!!.drawColor(Color.TRANSPARENT)
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -52,19 +59,20 @@ class DWCanvas(context: Context?, height:Int, width:Int ) : View(context) {
     }
 
     override fun onDraw(canvas: Canvas?) {
-
+        canvas?.drawBitmap(mBitmap, 0F, 0F, brush);
         canvas?.drawPath(path, brush)
-        //canvas?.drawBitmap( bitmap,0F , 0F, brush);
-        //canvas?.drawBitmap(bitmap, matrix, brush)
+        mCanvas?.drawPath(path, brush)
     }
 
      fun getDraw():String{
+
+
          val stream = ByteArrayOutputStream()
-         var bitmap = Bitmap.createBitmap(drawingCache)
-         bitmap!!.compress(Bitmap.CompressFormat.PNG, 100, stream)
+
+         mBitmap!!.compress(Bitmap.CompressFormat.PNG, 100, stream)
          val byteArray = stream.toByteArray()
          val encodedImage = Base64.encodeToString(byteArray, Base64.DEFAULT)
-         drawingCache.recycle()
+         mCanvas?.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
          return encodedImage
     }
 }
