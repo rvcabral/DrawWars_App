@@ -143,6 +143,12 @@ class GameActivity : AppCompatActivity(), ServiceListener {
             "TimesUp"->{
                 service!!.SetArt(getDrawFromView()!!, theme)
             }
+
+            "Error"->{
+                runOnUiThread {
+                    Toast.makeText(this@GameActivity, "Error", Toast.LENGTH_LONG)
+                }
+            }
         }
     }
 

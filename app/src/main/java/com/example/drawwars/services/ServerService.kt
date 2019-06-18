@@ -3,32 +3,31 @@ package com.example.drawwars.services
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
+import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import com.example.drawwars.utils.HandShakeResult
-import com.example.drawwars.utils.ThemeTimeoutWrapper
-import com.google.gson.JsonParser
-import com.google.gson.JsonSerializer
 import com.google.gson.internal.LinkedTreeMap
 import com.microsoft.signalr.HubConnectionBuilder
 import com.microsoft.signalr.HubConnectionState
-import khttp.async
 import java.util.*
-import java.util.function.Consumer
+
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
+
+
 
 class  ServerService: Service() {
     private val TAG = "MyService"
     private var listeners : List<ServiceListener> = ArrayList<ServiceListener>()
     val binder : IBinder = MyBinder()
     var handler: Handler? = null
-    //val hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5000/Server").build()
-    //val apiUrl = "http://10.0.2.2:5000/api/drawing/"
-    val hubConnection = HubConnectionBuilder.create("http://52.211.139.236/DrawWars/Server").build()
-    val apiUrl = "http://52.211.139.236/DrawWars/api/drawing/"
+    val hubConnection = HubConnectionBuilder.create("ws://10.0.2.2:5000/Server").build()
+    val apiUrl = "http://10.0.2.2:5000/api/drawing/"
+    //val hubConnection = HubConnectionBuilder.create("http://52.211.139.236/DrawWars/Server").build()
+    ///val hubConnection = HubConnectionBuilder.create("ws://52.211.139.236/DrawWars/Server").build()
+    ///val apiUrl = "http://52.211.139.236/DrawWars/api/drawing/"
     val ctx = this
     var connected = false
     var gameContext:HandShakeResult?=null
@@ -112,15 +111,19 @@ class  ServerService: Service() {
             hubConnection.start()
 
         var body = "{ \"SessionId\" : \"${gameContext!!.session}\", \"PlayerId\" : \"${gameContext!!.playerId}\",\"Extension\" : \"PNG\",\"Drawing\" : \"${draw}\", \"Theme\" : \"${theme}\"}"
-
-        var res = khttp.async.post(apiUrl +"submit", headers = mapOf("Content-Type" to "application/json"), data = body, onResponse = {
-            if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
-                hubConnection.start()
-            hubConnection.send("DrawSubmitted", gameContext)
-            for(listener in listeners)
-                listener.Interaction("DrawSubmitted","")
-        })
+        var t = Thread {
+            var res = khttp.extensions.post(apiUrl +"submit", headers = mapOf("Content-Type" to "application/json"), data = body)
+                .subscribe(io.reactivex.functions.Consumer {
+                    if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
+                        hubConnection.start()
+                    hubConnection.send("DrawSubmitted", gameContext)
+                    for(listener in listeners)
+                        listener.Interaction("DrawSubmitted","")
+                }
+            )
+        }.start()
     }
+
     fun Ready() {
         if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
             hubConnection.start()
@@ -132,7 +135,26 @@ class  ServerService: Service() {
             hubConnection.start()
         hubConnection.send("SendGuess", gameContext, guess)
     }
-//endregion
+    //endregion
+    /*fun get(jsonReq: String): String {
+        try {
+            val connection = URI(apiUrl).toURL().openConnection() as HttpURLConnection
+            connection.doOutput = true
+            connection.instanceFollowRedirects = false
+            connection.requestMethod = "POST"
+            connection.setRequestProperty("Content-Type", "application/json")
+            connection.setRequestProperty("charset", "utf-8")
+            connection.setRequestProperty("Content-Length", Integer.toString(jsonReq.length))
+            connection.useCaches = false
+            var byteArray = jsonReq.toByteArray()
+            DataOutputStream(connection.outputStream).use { wr -> wr.write(byteArray) }
+
+        } catch (e: IOException) {
+            Log.e("Error: ", "" + e)
+        }
+        return ""
+    }*/
+
 
 }
 
