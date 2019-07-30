@@ -76,45 +76,6 @@ class GameActivity : AppCompatActivity(), ServiceListener {
     }
 
 
-     //region  Standart Functions
-
-    override fun onPause() {
-        super.onPause()
-        service?.mute(this)
-        unbindService(mViewModel!!.getServiceConnection())
-    }
-
-
-
-    override fun onResume() {
-        super.onResume()
-        startService()
-    }
-
-    override fun onRestart() {
-        super.onRestart()
-        canvas = DWCanvas(this, Height, Width);
-    }
-
-    override fun onStop() {
-        super.onStop()
-        if (mViewModel!!.getBinder() != null) {
-            unbindService(mViewModel!!.getServiceConnection())
-        }
-    }
-    private fun startService() {
-        //val serviceIntent = Intent(this, ServerService::class.java)
-        //startService(serviceIntent)
-
-        bindService()
-    }
-
-    private fun bindService() {
-        val serviceBindIntent = Intent(this, ServerService::class.java)
-        bindService(serviceBindIntent, mViewModel!!.getServiceConnection(), Context.BIND_AUTO_CREATE)
-    }
-
-
     override fun Interaction(action: String, param: Any?) {
 
         when (action){
@@ -122,9 +83,9 @@ class GameActivity : AppCompatActivity(), ServiceListener {
                 runOnUiThread{
                     val receivedTheme = (param as ArrayList<String>)[0]
                     theme = receivedTheme
-                        //themes[0]
+                    //themes[0]
                     captionTextView.text = receivedTheme
-                        //themes[0]
+                    //themes[0]
 
 
                     ReadyButton.visibility=Button.INVISIBLE
@@ -150,6 +111,44 @@ class GameActivity : AppCompatActivity(), ServiceListener {
 
     private fun getDrawFromView():String?{
         return canvas?.getDraw()
+    }
+
+
+     //region  Standart Functions
+
+
+
+
+    override fun onRestart() {
+        super.onRestart()
+        canvas = DWCanvas(this, Height, Width);
+    }
+
+    override fun onResume() {
+        super.onResume()
+        bindService()
+        service?.listen(this@GameActivity)
+    }
+
+    override fun onDestroy() {
+        service?.mute(this)
+        unbindService(mViewModel!!.getServiceConnection())
+        super.onDestroy()
+    }
+
+    override fun onPause() {
+        service?.mute(this)
+        unbindService(mViewModel!!.getServiceConnection())
+        super.onPause()
+    }
+
+    private fun bindService() {
+        val serviceBindIntent = Intent(this, ServerService::class.java)
+        bindService(serviceBindIntent, mViewModel!!.getServiceConnection(), Context.BIND_AUTO_CREATE)
+    }
+
+    override fun onBackPressed() {
+        //Do nothing here.
     }
 
     //endregion

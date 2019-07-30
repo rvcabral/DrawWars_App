@@ -58,24 +58,34 @@ class MainActivity : AppCompatActivity(), ServiceListener {
             }
 
         }
+
+        startService()
     }
     override fun onResume() {
         super.onResume()
-        startService()
-        //bindService()
+        bindService()
+        service?.listen(this@MainActivity)
     }
 
     private fun startService() {
         val serviceIntent = Intent(this, ServerService::class.java)
         startService(serviceIntent)
+    }
 
-        bindService()
+    override fun onStop() {
+        service?.mute(this)
+        unbindService(mViewModel!!.getServiceConnection())
+        super.onStop()
     }
 
     override fun onDestroy() {
         service?.mute(this)
         unbindService(mViewModel!!.getServiceConnection())
         super.onDestroy()
+    }
+
+    override fun onBackPressed() {
+        //Do nothing here.
     }
 
     private fun bindService() {

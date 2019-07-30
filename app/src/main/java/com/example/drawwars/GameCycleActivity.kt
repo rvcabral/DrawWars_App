@@ -114,29 +114,29 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
 
     override fun onResume() {
         super.onResume()
-        startService()
-    }
-
-    private fun startService() {
-        //val serviceIntent = Intent(this, ServerService::class.java)
-        //startService(serviceIntent)
-
         bindService()
+        service?.listen(this@GameCycleActivity)
     }
 
     override fun onDestroy() {
         service?.mute(this)
+        unbindService(mViewModel!!.getServiceConnection())
         super.onDestroy()
     }
 
     override fun onPause() {
-        super.onPause()
         service?.mute(this)
+        unbindService(mViewModel!!.getServiceConnection())
+        super.onPause()
     }
 
     private fun bindService() {
         val serviceBindIntent = Intent(this, ServerService::class.java)
         bindService(serviceBindIntent, mViewModel!!.getServiceConnection(), Context.BIND_AUTO_CREATE)
+    }
+
+    override fun onBackPressed() {
+        //Do nothing here.
     }
 
     ///endregion
