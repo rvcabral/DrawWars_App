@@ -81,6 +81,7 @@ class GameActivity : AppCompatActivity(), ServiceListener {
     override fun onPause() {
         super.onPause()
         service?.mute(this)
+        unbindService(mViewModel!!.getServiceConnection())
     }
 
 
@@ -102,8 +103,8 @@ class GameActivity : AppCompatActivity(), ServiceListener {
         }
     }
     private fun startService() {
-        val serviceIntent = Intent(this, ServerService::class.java)
-        startService(serviceIntent)
+        //val serviceIntent = Intent(this, ServerService::class.java)
+        //startService(serviceIntent)
 
         bindService()
     }
@@ -117,7 +118,7 @@ class GameActivity : AppCompatActivity(), ServiceListener {
     override fun Interaction(action: String, param: Any?) {
 
         when (action){
-            "DrawThemes"->{
+            service?.ENDPOINT_DrawThemes->{
                 runOnUiThread{
                     val receivedTheme = (param as ArrayList<String>)[0]
                     theme = receivedTheme
@@ -133,21 +134,15 @@ class GameActivity : AppCompatActivity(), ServiceListener {
                     canvasLayout.visibility = FrameLayout.VISIBLE
                 }
             }
-            "DrawSubmitted"->{
+            service?.ENDPOINT_DrawSubmitted->{
                 runOnUiThread{
                     startActivity(Intent(this@GameActivity, GameCycleActivity::class.java))
                     service!!.mute(this);
                     finish()
                 }
             }
-            "TimesUp"->{
+            service?.ENDPOINT_TimesUp->{
                 service!!.SetArt(getDrawFromView()!!, theme)
-            }
-
-            "Error"->{
-                runOnUiThread {
-                    Toast.makeText(this@GameActivity, "Error", Toast.LENGTH_LONG)
-                }
             }
         }
     }

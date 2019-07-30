@@ -50,7 +50,8 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
 
     override fun Interaction(action: String, param: Any?) {
         when (action){
-            "TryAndGuess"-> {
+
+            service?.ENDPOINT_TryAndGuess -> {
                 runOnUiThread{
                     guessTextBox.text.clear()
                     guessTextBox.visibility = EditText.VISIBLE
@@ -58,7 +59,7 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
                     titleTextView.text = TryandguessTitle
                 }
             }
-            "StandBy"->{
+            service?.ENDPOINT_StandBy ->{
                 runOnUiThread {
                     guessTextBox.text.clear()
                     guessTextBox.visibility = EditText.INVISIBLE
@@ -66,21 +67,13 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
                     titleTextView.text = StandbyTitle
                 }
             }
-            "WaitForOtherPlayers"->{
-                runOnUiThread {
-                    guessTextBox.text.clear()
-                    guessTextBox.visibility = EditText.INVISIBLE
-                    sendGuessButton.visibility = Button.INVISIBLE
-                    titleTextView.text = WaitForOtherPlayersTitle
-                }
-            }
-            "WrongGuess"->{
+            service?.ENDPOINT_WrongGuess ->{
                 runOnUiThread {
                     guessTextBox.text.clear()
                     Toast.makeText(this@GameCycleActivity, "Wrong Guess. Try again!", Toast.LENGTH_LONG).show()
                 }
             }
-            "RightGuess"->{
+            service?.ENDPOINT_RightGuess ->{
                 runOnUiThread {
                     guessTextBox.text.clear()
                     guessTextBox.visibility = EditText.INVISIBLE
@@ -90,7 +83,7 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
                 }
             }
 
-            "SeeResults"->{
+            service?.ENDPOINT_SeeResults ->{
                 runOnUiThread {
                     guessTextBox.text.clear()
                     guessTextBox.visibility = EditText.INVISIBLE
@@ -98,7 +91,7 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
                     titleTextView.text = EndOfRoundTitle
                 }
             }
-            "NextRound"->{
+            service?.ENDPOINT_NextRound->{
                 runOnUiThread {
                     var activityIntent = Intent(this@GameCycleActivity, GameActivity::class.java)
                     activityIntent.putExtra("EndOfRound", true)
@@ -107,7 +100,7 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
                     finish()
                 }
             }
-            "EndOfGame"->{
+            service?.ENDPOINT_EndOfGame ->{
                 runOnUiThread {
                     this.startActivity(Intent(this@GameCycleActivity, MainActivity::class.java))
                     service!!.mute(this);
@@ -125,8 +118,8 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
     }
 
     private fun startService() {
-        val serviceIntent = Intent(this, ServerService::class.java)
-        startService(serviceIntent)
+        //val serviceIntent = Intent(this, ServerService::class.java)
+        //startService(serviceIntent)
 
         bindService()
     }

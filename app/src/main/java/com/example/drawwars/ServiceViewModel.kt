@@ -15,9 +15,6 @@ import com.example.drawwars.utils.HandShakeResult
 
 class ServiceViewModel : ViewModel() {
     private val TAG = "ServiceViewModel"
-
-    private val isConnected = MutableLiveData<Boolean>()
-    private val gameContext = MutableLiveData<HandShakeResult>()
     private val mBinder = MutableLiveData<ServerService.MyBinder>()
 
 
@@ -45,14 +42,6 @@ class ServiceViewModel : ViewModel() {
         return mBinder
     }
 
-
-    fun isConnected(): LiveData<Boolean> {
-        return isConnected
-    }
-    fun gameContext():LiveData<HandShakeResult>{
-
-        return gameContext
-    }
 
 
 }

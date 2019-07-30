@@ -19,6 +19,8 @@ import kotlin.collections.ArrayList
 
 
 class  ServerService: Service() {
+
+    /// region fields and constants
     private val TAG = "MyService"
     private var listeners : List<ServiceListener> = ArrayList<ServiceListener>()
     val binder : IBinder = MyBinder()
@@ -26,11 +28,26 @@ class  ServerService: Service() {
     val hubConnection = HubConnectionBuilder.create("ws://10.0.2.2:5000/Server").build()
     val apiUrl = "http://10.0.2.2:5000/api/drawing/"
     //val hubConnection = HubConnectionBuilder.create("http://52.211.139.236/DrawWars/Server").build()
-    ///val hubConnection = HubConnectionBuilder.create("ws://52.211.139.236/DrawWars/Server").build()
-    ///val apiUrl = "http://52.211.139.236/DrawWars/api/drawing/"
-    val ctx = this
+    //val hubConnection = HubConnectionBuilder.create("ws://52.211.139.236/DrawWars/Server").build()
+    //val apiUrl = "http://52.211.139.236/DrawWars/api/drawing/"
     var connected = false
     var gameContext:HandShakeResult?=null
+
+
+    val ENDPOINT_AckSession = "AckSession"
+    val ENDPOINT_AckNickName = "AckNickname"
+    val ENDPOINT_NonExistingSession = "NonExistingSession"
+    val ENDPOINT_DrawThemes = "DrawThemes"
+    val ENDPOINT_TryAndGuess = "TryAndGuess"
+    val ENDPOINT_StandBy = "StandBy"
+    val ENDPOINT_WrongGuess = "WrongGuess"
+    val ENDPOINT_RightGuess = "RightGuess"
+    val ENDPOINT_SeeResults = "SeeResults"
+    val ENDPOINT_EndOfGame = "EndOfGame"
+    val ENDPOINT_TimesUp = "TimesUp"
+    val ENDPOINT_NextRound = "NextRound"
+    val ENDPOINT_DrawSubmitted = "DrawSubmitted"
+///endregion
 
     override fun onBind(intent: Intent?): IBinder? {
         return binder
@@ -44,38 +61,41 @@ class  ServerService: Service() {
             connected = true;
         }
 
-        hubConnection.on("AckSession", { x-> gameContext = HandShakeResult(x.session,x.playerId );notifyListeners("AckSession",null)  }, HandShakeResult::class.java)
-        hubConnection.on("AckNickname", {notifyListeners("AckNickname",null)})
-        hubConnection.on("NonExistingSession",{uid->notifyListeners("NonExistingSession",uid)}, UUID::class.java)
-        hubConnection.on("DrawThemes",  {m -> notifyListeners("DrawThemes",m ) }, Any::class.java)//as HashMap<UUID, List<String>>
-        hubConnection.on("TryAndGuess", {notifyListeners("TryAndGuess",null)})
-        hubConnection.on("StandBy",     {notifyListeners("StandBy",null)})
-        hubConnection.on("WrongGuess",  {notifyListeners("WrongGuess",null)})
-        hubConnection.on("RightGuess",  {notifyListeners("RightGuess",null)})
-        hubConnection.on("SeeResults",  {notifyListeners("SeeResults",null)})
-        hubConnection.on("EndOfGame",   {notifyListeners("EndOfGame",null)})
-        hubConnection.on("TimesUp",   {notifyListeners("TimesUp",null)})
-        hubConnection.on("NextRound",   {notifyListeners("NextRound",null)})
+        hubConnection.on(ENDPOINT_AckSession, { x-> gameContext = HandShakeResult(x.session,x.playerId );notifyListeners(ENDPOINT_AckSession,null)  }, HandShakeResult::class.java)
+        hubConnection.on(ENDPOINT_AckNickName, {notifyListeners(ENDPOINT_AckNickName,null)})
+        hubConnection.on(ENDPOINT_NonExistingSession,{uid->notifyListeners(ENDPOINT_NonExistingSession,uid)}, UUID::class.java)
+        hubConnection.on(ENDPOINT_DrawThemes,  {m -> notifyListeners(ENDPOINT_DrawThemes,m ) }, Any::class.java)//as HashMap<UUID, List<String>>
+        hubConnection.on(ENDPOINT_TryAndGuess, {notifyListeners(ENDPOINT_TryAndGuess,null)})
+        hubConnection.on(ENDPOINT_StandBy,     {notifyListeners(ENDPOINT_StandBy,null)})
+        hubConnection.on(ENDPOINT_WrongGuess,  {notifyListeners(ENDPOINT_WrongGuess,null)})
+        hubConnection.on(ENDPOINT_RightGuess,  {notifyListeners(ENDPOINT_RightGuess,null)})
+        hubConnection.on(ENDPOINT_SeeResults,  {notifyListeners(ENDPOINT_SeeResults,null)})
+        hubConnection.on(ENDPOINT_EndOfGame,   {notifyListeners(ENDPOINT_EndOfGame,null)})
+        hubConnection.on(ENDPOINT_TimesUp,   {notifyListeners(ENDPOINT_TimesUp,null)})
+        hubConnection.on(ENDPOINT_NextRound,   {notifyListeners(ENDPOINT_NextRound,null)})
 
 
 
     }
-
- //region Socket Interface
- private fun notifyListeners(action:String, param:Any?) {
-     var p = param
-     if(action=="DrawThemes")
-         p = (param as LinkedTreeMap<String, ArrayList<String>>)[gameContext!!.playerId.toString()]
-
-     for(listener in listeners)
-         listener.Interaction(action, p)
- }
 
     inner class MyBinder : Binder() {
         fun getService() : ServerService{
             return this@ServerService
         }
     }
+
+    ///region Socket Interface
+
+    private fun notifyListeners(action:String, param:Any?) {
+        var p = param
+        if(action==ENDPOINT_DrawThemes)
+         p = (param as LinkedTreeMap<String, ArrayList<String>>)[gameContext!!.playerId.toString()]
+
+        for(listener in listeners)
+         listener.Interaction(action, p)
+    }
+
+
 
     override fun onTaskRemoved(rootIntent: Intent) {
         super.onTaskRemoved(rootIntent)
@@ -116,9 +136,9 @@ class  ServerService: Service() {
                 .subscribe(io.reactivex.functions.Consumer {
                     if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
                         hubConnection.start()
-                    hubConnection.send("DrawSubmitted", gameContext)
+                    hubConnection.send(ENDPOINT_DrawSubmitted, gameContext)
                     for(listener in listeners)
-                        listener.Interaction("DrawSubmitted","")
+                        listener.Interaction(ENDPOINT_DrawSubmitted,"")
                 }
             )
         }.start()
@@ -135,26 +155,9 @@ class  ServerService: Service() {
             hubConnection.start()
         hubConnection.send("SendGuess", gameContext, guess)
     }
-    //endregion
-    /*fun get(jsonReq: String): String {
-        try {
-            val connection = URI(apiUrl).toURL().openConnection() as HttpURLConnection
-            connection.doOutput = true
-            connection.instanceFollowRedirects = false
-            connection.requestMethod = "POST"
-            connection.setRequestProperty("Content-Type", "application/json")
-            connection.setRequestProperty("charset", "utf-8")
-            connection.setRequestProperty("Content-Length", Integer.toString(jsonReq.length))
-            connection.useCaches = false
-            var byteArray = jsonReq.toByteArray()
-            DataOutputStream(connection.outputStream).use { wr -> wr.write(byteArray) }
 
-        } catch (e: IOException) {
-            Log.e("Error: ", "" + e)
-        }
-        return ""
-    }*/
 
+    ///endregion
 
 }
 

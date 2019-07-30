@@ -5,6 +5,5 @@ import java.util.*
 
 interface ServiceListener {
 
-
     fun Interaction(action:String, param:Any?)
 }

@@ -20,11 +20,11 @@ class MainActivity : AppCompatActivity(), ServiceListener {
 
     override fun Interaction(action: String, param: Any?) {
         when (action){
-            "AckSession"->{
+            service?.ENDPOINT_AckSession->{
                 val intent = Intent(this, SetupActivity::class.java)
                 startActivity(intent)
             }
-            "NonExistingSession" -> {
+            service?.ENDPOINT_NonExistingSession -> {
                 runOnUiThread{
                     Toast.makeText(this@MainActivity, "Invalid Room Code", Toast.LENGTH_LONG).show()
                 }
@@ -41,10 +41,8 @@ class MainActivity : AppCompatActivity(), ServiceListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val intent = Intent(this, SetupActivity::class.java)
+
         mViewModel = ViewModelProviders.of(this).get(ServiceViewModel::class.java!!)
-
-
         mViewModel?.getBinder()?.observe(this, object:Observer<ServerService.MyBinder>{
             override fun onChanged(binder: MyBinder?) {
                 service = binder?.getService()
@@ -64,6 +62,7 @@ class MainActivity : AppCompatActivity(), ServiceListener {
     override fun onResume() {
         super.onResume()
         startService()
+        //bindService()
     }
 
     private fun startService() {
@@ -75,16 +74,13 @@ class MainActivity : AppCompatActivity(), ServiceListener {
 
     override fun onDestroy() {
         service?.mute(this)
+        unbindService(mViewModel!!.getServiceConnection())
         super.onDestroy()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        service?.mute(this)
     }
 
     private fun bindService() {
         val serviceBindIntent = Intent(this, ServerService::class.java)
         bindService(serviceBindIntent, mViewModel!!.getServiceConnection(), Context.BIND_AUTO_CREATE)
+
     }
 }

@@ -52,14 +52,15 @@ class SetupActivity : AppCompatActivity(), ServiceListener {
     }
 
     private fun startService() {
-        val serviceIntent = Intent(this, ServerService::class.java)
-        startService(serviceIntent)
+        //val serviceIntent = Intent(this, ServerService::class.java)
+        //startService(serviceIntent)
 
         bindService()
     }
 
     override fun onDestroy() {
         service?.mute(this)
+        unbindService(mViewModel!!.getServiceConnection())
         super.onDestroy()
     }
 
