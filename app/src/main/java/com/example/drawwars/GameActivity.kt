@@ -36,6 +36,7 @@ class GameActivity : AppCompatActivity(), ServiceListener {
     private var theme :String="";
     private var Height :Int=0
     private var Width :Int=0
+    private var canvasVM : DWCanvasViewModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +45,19 @@ class GameActivity : AppCompatActivity(), ServiceListener {
         if(intent.extras!=null && intent.extras["EndOfRound"]!=null && intent.extras["EndOfRound"] as Boolean){
             ReadyButton.visibility=Button.INVISIBLE
         }
+
+        canvasVM = ViewModelProviders.of(this).get(DWCanvasViewModel::class.java)
+        canvasVM?.getCanvas()?.observe(this, object : Observer<DWCanvas>{
+            override fun onChanged(dwcanvas: DWCanvas?) {
+                canvas = dwcanvas
+                canvasLayout.visibility = FrameLayout.INVISIBLE
+                canvasLayout.addView(canvas)
+                canvasLayout.isEnabled = false
+
+            }
+
+        })
+        canvasVM?.init(this)
 
         captionTextView.text = "Aguarde ;)"
         submitButton.visibility=Button.INVISIBLE
@@ -57,14 +71,6 @@ class GameActivity : AppCompatActivity(), ServiceListener {
 
         })
         ReadyButton.setOnClickListener { service!!.Ready() }
-        val displayMetrics = DisplayMetrics()
-        canvasLayout.visibility = FrameLayout.INVISIBLE
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-        Height = displayMetrics.heightPixels
-        Width = displayMetrics.widthPixels
-        canvas = DWCanvas(this, Height, Width);
-        canvasLayout.addView(canvas)
-        canvasLayout.isEnabled = false
         submitButton.setOnClickListener {
 
             service!!.SetArt(getDrawFromView()!!, theme)
@@ -114,15 +120,15 @@ class GameActivity : AppCompatActivity(), ServiceListener {
     }
 
 
-     //region  Standart Functions
+     //region  Standard Functions
 
 
 
 
-    override fun onRestart() {
+    /*override fun onRestart() {
         super.onRestart()
         canvas = DWCanvas(this, Height, Width);
-    }
+    }*/
 
     override fun onResume() {
         super.onResume()
@@ -133,6 +139,7 @@ class GameActivity : AppCompatActivity(), ServiceListener {
     override fun onDestroy() {
         service?.mute(this)
         unbindService(mViewModel!!.getServiceConnection())
+        //canvasVM?.getCanvas().removeObserver()
         super.onDestroy()
     }
 

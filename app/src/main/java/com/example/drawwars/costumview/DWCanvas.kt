@@ -15,7 +15,7 @@ import android.util.Base64
 import java.io.ByteArrayOutputStream
 
 
-class DWCanvas(context: Context?, height:Int, width:Int ) : View(context) {
+class DWCanvas(context: Context?) : View(context) {
     private val path = Path()
     val brush = Paint()
     var mBitmap:Bitmap? = null
@@ -26,11 +26,6 @@ class DWCanvas(context: Context?, height:Int, width:Int ) : View(context) {
         brush.style = Paint.Style.STROKE
         brush.strokeJoin = Paint.Join.ROUND
         brush.strokeWidth = 10f
-        //bitmap = Bitmap.createBitmap(height, width,Bitmap.Config.ALPHA_8)
-        //myCanvas=Canvas(bitmap);
-
-        //isDrawingCacheEnabled =true
-        //buildDrawingCache(true)
 
     }
 
