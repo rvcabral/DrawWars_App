@@ -17,7 +17,7 @@ import kotlinx.android.synthetic.main.content_setup.*
 class SetupActivity : AppCompatActivity(), ServiceListener {
     override fun Interaction(action: String, param: Any?) {
         when (action){
-            "AckNickname"-> startActivity(Intent(this, GameActivity::class.java ))
+            getString(R.string.Action_AckNickName)-> startActivity(Intent(this, GameActivity::class.java ))
         }
     }
 
@@ -27,7 +27,7 @@ class SetupActivity : AppCompatActivity(), ServiceListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setup)
-        mViewModel = ViewModelProviders.of(this).get(ServiceViewModel::class.java!!)
+        mViewModel = ViewModelProviders.of(this).get(ServiceViewModel::class.java)
 
 
         mViewModel?.getBinder()?.observe(this, object: Observer<ServerService.MyBinder> {
@@ -39,7 +39,7 @@ class SetupActivity : AppCompatActivity(), ServiceListener {
         })
 
         SubmitButton.setOnClickListener {
-            if(CodeInput.text.isEmpty()) Toast.makeText(this@SetupActivity, "Insira um nome", Toast.LENGTH_LONG);
+            if(CodeInput.text.isEmpty()) Toast.makeText(this@SetupActivity, getString(R.string.SetNickMessage), Toast.LENGTH_LONG);
             else service?.sendNickName(CodeInput.text.toString())
         }
 

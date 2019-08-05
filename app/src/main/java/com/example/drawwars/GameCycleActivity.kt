@@ -19,10 +19,6 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
 
     private var mViewModel: ServiceViewModel? = null
     private var service: ServerService? = null
-    private val StandbyTitle = "Your Draw Is Being Shown!"
-    private val WaitForOtherPlayersTitle = "Please wait for the other players.."
-    private val TryandguessTitle = "Time to Guess!"
-    private val EndOfRoundTitle = "Round ended"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +32,7 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
             override fun onChanged(binder: ServerService.MyBinder?) {
                 service = binder?.getService()
                 service?.listen(this@GameCycleActivity)
-                titleTextView.text=WaitForOtherPlayersTitle
+                titleTextView.text=getString(R.string.WaitForOtherPlayersTitle)
                 guessTextBox.visibility = EditText.INVISIBLE
                 sendGuessButton.visibility = Button.INVISIBLE
                 sendGuessButton.setOnClickListener {
@@ -51,47 +47,47 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
     override fun Interaction(action: String, param: Any?) {
         when (action){
 
-            service?.ENDPOINT_TryAndGuess -> {
+            getString(R.string.Action_TryAndGuess) -> {
                 runOnUiThread{
                     guessTextBox.text.clear()
                     guessTextBox.visibility = EditText.VISIBLE
                     sendGuessButton.visibility = Button.VISIBLE
-                    titleTextView.text = TryandguessTitle
+                    titleTextView.text = getString(R.string.TryandguessTitle)
                 }
             }
-            service?.ENDPOINT_StandBy ->{
+            getString(R.string.Action_StandBy) ->{
                 runOnUiThread {
                     guessTextBox.text.clear()
                     guessTextBox.visibility = EditText.INVISIBLE
                     sendGuessButton.visibility = Button.INVISIBLE
-                    titleTextView.text = StandbyTitle
+                    titleTextView.text = getString(R.string.StandbyTitle)
                 }
             }
-            service?.ENDPOINT_WrongGuess ->{
+            getString(R.string.Action_WrongGuess) ->{
                 runOnUiThread {
                     guessTextBox.text.clear()
-                    Toast.makeText(this@GameCycleActivity, "Wrong Guess. Try again!", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@GameCycleActivity, getString(R.string.WrongGuessFeedback), Toast.LENGTH_LONG).show()
                 }
             }
-            service?.ENDPOINT_RightGuess ->{
+            getString(R.string.Action_RightGuess) ->{
                 runOnUiThread {
                     guessTextBox.text.clear()
                     guessTextBox.visibility = EditText.INVISIBLE
                     sendGuessButton.visibility = Button.INVISIBLE
-                    titleTextView.text = StandbyTitle
-                    Toast.makeText(this@GameCycleActivity, "You got it right!", Toast.LENGTH_LONG).show()
+                    titleTextView.text = getString(R.string.StandbyTitle)
+                    Toast.makeText(this@GameCycleActivity, getString(R.string.RightGuessMessage), Toast.LENGTH_LONG).show()
                 }
             }
 
-            service?.ENDPOINT_SeeResults ->{
+            getString(R.string.Action_SeeResults) ->{
                 runOnUiThread {
                     guessTextBox.text.clear()
                     guessTextBox.visibility = EditText.INVISIBLE
                     sendGuessButton.visibility = Button.INVISIBLE
-                    titleTextView.text = EndOfRoundTitle
+                    titleTextView.text = getString(R.string.EndOfRoundTitle)
                 }
             }
-            service?.ENDPOINT_NextRound->{
+            getString(R.string.Action_NextRound)->{
                 runOnUiThread {
                     var activityIntent = Intent(this@GameCycleActivity, GameActivity::class.java)
                     activityIntent.putExtra("EndOfRound", true)
@@ -100,7 +96,7 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
                     finish()
                 }
             }
-            service?.ENDPOINT_EndOfGame ->{
+            getString(R.string.Action_EndOfGame) ->{
                 runOnUiThread {
                     this.startActivity(Intent(this@GameCycleActivity, MainActivity::class.java))
                     service!!.mute(this);

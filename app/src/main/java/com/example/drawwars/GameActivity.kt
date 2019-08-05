@@ -21,10 +21,12 @@ import android.util.Base64
 import android.widget.Button
 import com.example.drawwars.services.ServiceListener
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import com.example.drawwars.utils.ThemeTimeoutWrapper
 import java.io.ByteArrayOutputStream
+import java.lang.Exception
 
 
 class GameActivity : AppCompatActivity(), ServiceListener {
@@ -34,8 +36,6 @@ class GameActivity : AppCompatActivity(), ServiceListener {
     private var mViewModel: ServiceViewModel? = null
     private var canvas :DWCanvas?=null
     private var theme :String="";
-    private var Height :Int=0
-    private var Width :Int=0
     private var canvasVM : DWCanvasViewModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,29 +47,23 @@ class GameActivity : AppCompatActivity(), ServiceListener {
         }
 
         canvasVM = ViewModelProviders.of(this).get(DWCanvasViewModel::class.java)
-        canvasVM?.getCanvas()?.observe(this, object : Observer<DWCanvas>{
-            override fun onChanged(dwcanvas: DWCanvas?) {
+        canvasVM?.getCanvas()?.observe(this,
+            Observer<DWCanvas> { dwcanvas ->
                 canvas = dwcanvas
                 canvasLayout.visibility = FrameLayout.INVISIBLE
                 canvasLayout.addView(canvas)
                 canvasLayout.isEnabled = false
-
-            }
-
-        })
+            })
         canvasVM?.init(this)
 
-        captionTextView.text = "Aguarde ;)"
+        captionTextView.text = getString(R.string.PleaseWaitMessage)
         submitButton.visibility=Button.INVISIBLE
-        mViewModel = ViewModelProviders.of(this).get(ServiceViewModel::class.java!!)
-        mViewModel?.getBinder()?.observe(this, object: Observer<ServerService.MyBinder> {
-            override fun onChanged(binder: ServerService.MyBinder?) {
+        mViewModel = ViewModelProviders.of(this).get(ServiceViewModel::class.java)
+        mViewModel?.getBinder()?.observe(this,
+            Observer<ServerService.MyBinder> { binder ->
                 service = binder?.getService()
                 service?.listen(this@GameActivity)
-
-            }
-
-        })
+            })
         ReadyButton.setOnClickListener { service!!.Ready() }
         submitButton.setOnClickListener {
 
@@ -85,7 +79,7 @@ class GameActivity : AppCompatActivity(), ServiceListener {
     override fun Interaction(action: String, param: Any?) {
 
         when (action){
-            service?.ENDPOINT_DrawThemes->{
+            getString(R.string.Action_DrawThemes)->{
                 runOnUiThread{
                     val receivedTheme = (param as ArrayList<String>)[0]
                     theme = receivedTheme
@@ -101,14 +95,14 @@ class GameActivity : AppCompatActivity(), ServiceListener {
                     canvasLayout.visibility = FrameLayout.VISIBLE
                 }
             }
-            service?.ENDPOINT_DrawSubmitted->{
+            getString(R.string.Action_DrawSubmitted)->{
                 runOnUiThread{
                     startActivity(Intent(this@GameActivity, GameCycleActivity::class.java))
                     service!!.mute(this);
                     finish()
                 }
             }
-            service?.ENDPOINT_TimesUp->{
+            getString(R.string.Action_TimesUp)->{
                 service!!.SetArt(getDrawFromView()!!, theme)
             }
         }
@@ -124,12 +118,6 @@ class GameActivity : AppCompatActivity(), ServiceListener {
 
 
 
-
-    /*override fun onRestart() {
-        super.onRestart()
-        canvas = DWCanvas(this, Height, Width);
-    }*/
-
     override fun onResume() {
         super.onResume()
         bindService()
@@ -138,7 +126,12 @@ class GameActivity : AppCompatActivity(), ServiceListener {
 
     override fun onDestroy() {
         service?.mute(this)
-        unbindService(mViewModel!!.getServiceConnection())
+        try {
+            unbindService(mViewModel!!.getServiceConnection())
+        } catch (e:Exception){
+            Log.d("Game Activity", "Couldn't unbind");
+        }
+
         //canvasVM?.getCanvas().removeObserver()
         super.onDestroy()
     }

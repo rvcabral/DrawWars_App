@@ -1,4 +1,30 @@
 <resources>
     <string name="app_name">DrawWars</string>
     <string name="title_activity_setup">SetupActivity</string>
+    <string name="PleaseWaitMessage">Please Wait ;)</string>
+    <string name="StandbyTitle">Your Draw Is Being Shown!</string>
+    <string name="WaitForOtherPlayersTitle">Please wait for the other players..</string>
+    <string name="TryandguessTitle">Time to Guess!</string>
+    <string name="EndOfRoundTitle">Round ended</string>
+    <string name="WrongGuessFeedback">Wrong Guess. Try again!</string>
+    <string name="Action_AckNickName">AckNickname</string>
+    <string name="SetNickMessage">Choose your nickname</string>
+    <string name="Action_AckSession">AckSession</string>
+    <string name="Action_NonExistingSession">NonExistingSession</string>
+    <string name="Action_DrawThemes">DrawThemes</string>
+    <string name="Action_TryAndGuess">TryAndGuess</string>
+    <string name="Action_StandBy">StandBy</string>
+    <string name="Action_WrongGuess">WrongGuess</string>
+    <string name="Action_RightGuess">RightGuess</string>
+    <string name="Action_SeeResults">SeeResults</string>
+    <string name="Action_EndOfGame">EndOfGame</string>
+    <string name="Action_TimesUp">TimesUp</string>
+    <string name="Action_NextRound">NextRound</string>
+    <string name="Action_DrawSubmitted">DrawSubmitted</string>
+    <string name="Action_Inlist">Inlist</string>
+    <string name="Action_SetNickname">SetPlayerNickName</string>
+    <string name="Action_Ready">Ready</string>
+    <string name="Action_SendGuess">SendGuess</string>
+    <string name="InvalidRoomMessage">Invalid Room Code</string>
+    <string name="RightGuessMessage">You got it right!</string>
 </resources>
