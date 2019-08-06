@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -13,6 +14,7 @@ import com.example.drawwars.services.ServerService
 import com.example.drawwars.services.ServiceListener
 import kotlinx.android.synthetic.main.activity_game_cycle.*
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.Exception
 import java.time.Duration
 
 class GameCycleActivity : AppCompatActivity(), ServiceListener {
@@ -92,14 +94,12 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
                     var activityIntent = Intent(this@GameCycleActivity, GameActivity::class.java)
                     activityIntent.putExtra("EndOfRound", true)
                     this.startActivity(activityIntent)
-                    service!!.mute(this);
                     finish()
                 }
             }
             getString(R.string.Action_EndOfGame) ->{
                 runOnUiThread {
                     this.startActivity(Intent(this@GameCycleActivity, MainActivity::class.java))
-                    service!!.mute(this);
                     finish()
                 }
             }
@@ -116,7 +116,13 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
 
     override fun onDestroy() {
         service?.mute(this)
-        unbindService(mViewModel!!.getServiceConnection())
+        try {
+            unbindService(mViewModel!!.getServiceConnection())
+        }
+        catch (e : Exception){
+            Log.d("Game Activity", "Couldn't unbind");
+        }
+
         super.onDestroy()
     }
 
