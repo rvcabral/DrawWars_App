@@ -27,4 +27,8 @@
     <string name="Action_SendGuess">SendGuess</string>
     <string name="InvalidRoomMessage">Invalid Room Code</string>
     <string name="RightGuessMessage">You got it right!</string>
+    <string name="Action_InteractionCount">InteractionCount</string>
+    <string name="DeviceID">DeviceIdSharedPreference</string>
+    <string name="Action_ConnectionIdChanged">ConnectionIdMightHaveChanged</string>
+    <string name="Action_ServerDied">ServerDied</string>
 </resources>

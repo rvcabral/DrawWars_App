@@ -2,18 +2,23 @@ package com.example.drawwars
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
-import android.content.Context
-import android.content.Intent
+import android.content.*
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
+import android.net.wifi.WifiManager
+import android.net.wifi.aware.WifiAwareManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.Settings
+import android.support.v7.app.AlertDialog
+import android.widget.Button
 import com.example.drawwars.services.ServerService
-import com.example.drawwars.utils.HandShakeResult
 import kotlinx.android.synthetic.main.activity_main.*
 import com.example.drawwars.services.ServerService.MyBinder
-import android.support.v4.app.BundleCompat.getBinder
-import android.util.Log
 import android.widget.Toast
 import com.example.drawwars.services.ServiceListener
+import com.example.drawwars.utils.SharedUtil.Companion.WifiDisabled
+import kotlinx.android.synthetic.main.activity_game.*
 
 
 class MainActivity : AppCompatActivity(), ServiceListener {
@@ -38,33 +43,84 @@ class MainActivity : AppCompatActivity(), ServiceListener {
     private var mViewModel: ServiceViewModel? = null
     private var service: ServerService? = null
 
+    private var receiver = object:BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+         var connectionInfo = (intent?.extras?.get(WifiManager.EXTRA_NETWORK_INFO) as NetworkInfo)
+            if(connectionInfo!= null){
+                if(connectionInfo.isConnected){
+                    if (service == null || service!!.regainedConnection()) {
+                        mViewModel = ViewModelProviders.of(this@MainActivity).get(ServiceViewModel::class.java)
+                        mViewModel?.getBinder()?.observe(this@MainActivity,
+                            Observer<MyBinder> { binder ->
+                                service = binder?.getService()
+                                service?.listen(this@MainActivity)
+                            })
+                        runOnUiThread { SubmitButton?.isEnabled = true }
+                        startService()
+                        bindService()
+                    }
+                }
+                if(!connectionInfo.isConnected){
+                    if(service==null || service!!.lostConnection())
+                        runOnUiThread { SubmitButton?.isEnabled = false }
+                }
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val intentFilter = IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION)
+        registerReceiver(receiver, intentFilter)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mViewModel = ViewModelProviders.of(this).get(ServiceViewModel::class.java)
-        mViewModel?.getBinder()?.observe(this, object:Observer<ServerService.MyBinder>{
-            override fun onChanged(binder: MyBinder?) {
-                service = binder?.getService()
-                service?.listen(this@MainActivity)
-            }
+        val cm = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
+        val isConnected: Boolean = activeNetwork?.isConnected == true
 
-        })
-
-        SubmitButton.setOnClickListener {
-                b->
+        SubmitButton?.setOnClickListener {
             if(CodeInput.text.isNotEmpty()){
                 service?.Inlist(CodeInput.text.toString())
             }
-
         }
 
-        startService()
+        if(!isConnected){
+            val dialog:AlertDialog.Builder = AlertDialog.Builder(this)
+            dialog.setMessage("You don't have an internet connection. Please change the settings.")
+                .setPositiveButton("Ok") { _, _ -> }
+                .show()
+            SubmitButton.isEnabled = false
+        }
+        else{
+            mViewModel = ViewModelProviders.of(this).get(ServiceViewModel::class.java)
+            mViewModel?.getBinder()?.observe(this,
+                Observer<MyBinder> { binder ->
+                    service = binder?.getService()
+                    service?.listen(this@MainActivity)
+                })
+            startService()
+        }
+
+
+
     }
+
+
+
+
+
     override fun onResume() {
         super.onResume()
-        bindService()
-        service?.listen(this@MainActivity)
+        if((this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetwork != null &&
+            (this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetworkInfo.isConnected){
+            bindService()
+            service?.listen(this@MainActivity)
+        }
+
     }
 
     private fun startService() {
@@ -74,13 +130,20 @@ class MainActivity : AppCompatActivity(), ServiceListener {
 
     override fun onStop() {
         service?.mute(this)
-        unbindService(mViewModel!!.getServiceConnection())
+        if((this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetwork != null &&
+            (this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetworkInfo.isConnected) {
+            unbindService(mViewModel!!.getServiceConnection())
+        }
+        unregisterReceiver(receiver)
         super.onStop()
     }
 
     override fun onDestroy() {
         service?.mute(this)
-        unbindService(mViewModel!!.getServiceConnection())
+        if((this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetwork != null &&
+            (this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetworkInfo.isConnected) {
+            unbindService(mViewModel!!.getServiceConnection())
+        }
         super.onDestroy()
     }
 
@@ -93,4 +156,6 @@ class MainActivity : AppCompatActivity(), ServiceListener {
         bindService(serviceBindIntent, mViewModel!!.getServiceConnection(), Context.BIND_AUTO_CREATE)
 
     }
+
+
 }

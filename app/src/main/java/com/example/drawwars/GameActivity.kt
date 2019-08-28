@@ -12,11 +12,16 @@ import com.microsoft.signalr.HubConnectionState
 import kotlinx.android.synthetic.main.activity_game.*
 import java.time.Duration
 import android.arch.lifecycle.ViewModelProviders
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.os.Handler
 import com.example.drawwars.services.ServerService
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
+import android.net.NetworkInfo
+import android.net.wifi.WifiManager
+import android.support.v7.app.AlertDialog
 import android.util.Base64
 import android.widget.Button
 import com.example.drawwars.services.ServiceListener
@@ -25,8 +30,10 @@ import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import com.example.drawwars.utils.ThemeTimeoutWrapper
+import io.reactivex.functions.Consumer
 import java.io.ByteArrayOutputStream
 import java.lang.Exception
+import kotlin.system.exitProcess
 
 
 class GameActivity : AppCompatActivity(), ServiceListener {
@@ -105,6 +112,18 @@ class GameActivity : AppCompatActivity(), ServiceListener {
             getString(R.string.Action_TimesUp)->{
                 service!!.SetArt(getDrawFromView()!!, theme)
             }
+            getString(R.string.Action_ServerDied)->{
+                runOnUiThread {
+                    val dialog: AlertDialog.Builder = AlertDialog.Builder(this@GameActivity)
+                    dialog.setMessage("Server is down")
+                        .setPositiveButton("Ok") { _, _ ->
+                            service?.resetGameData()
+                            this@GameActivity.finishAndRemoveTask()
+                            exitProcess(0);
+                        }
+                        .show()
+                }
+            }
         }
     }
 
@@ -142,6 +161,11 @@ class GameActivity : AppCompatActivity(), ServiceListener {
         super.onPause()
     }
 
+    override fun onStop() {
+        unregisterReceiver(receiver)
+        super.onStop()
+    }
+
     private fun bindService() {
         val serviceBindIntent = Intent(this, ServerService::class.java)
         bindService(serviceBindIntent, mViewModel!!.getServiceConnection(), Context.BIND_AUTO_CREATE)
@@ -153,4 +177,54 @@ class GameActivity : AppCompatActivity(), ServiceListener {
 
     //endregion
 
+    override fun onStart() {
+        super.onStart()
+        val intentFilter = IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION)
+        registerReceiver(receiver, intentFilter)
+    }
+    private var receiver = object: BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            var connectionInfo = (intent?.extras?.get(WifiManager.EXTRA_NETWORK_INFO) as NetworkInfo)
+            if (connectionInfo != null) {
+                if (connectionInfo.isConnected) {
+                    if (service != null) {
+                        if (service!!.regainedConnection()) {
+                            runOnUiThread {
+                                ReadyButton.isEnabled = true
+                                submitButton.isEnabled = true
+                            }
+                            service!!.InteractionsWereLost(Consumer { Yes ->
+                                if (Yes) {
+                                    runOnUiThread {
+                                        val dialog: AlertDialog.Builder = AlertDialog.Builder(this@GameActivity)
+                                        dialog.setMessage("Disconnected because of connection issues")
+                                            .setPositiveButton("Ok") { _, _ ->
+                                                service?.resetGameData()
+                                                this@GameActivity.startActivity(
+                                                    Intent(
+                                                        this@GameActivity,
+                                                        MainActivity::class.java
+                                                    )
+                                                )
+                                                this@GameActivity.finish()
+                                            }
+                                            .show()
+                                    }
+                                } else
+                                    service!!.ConnectionIdMightHaveChanged()
+                            })
+                        }
+                    }
+                }
+                if (!connectionInfo.isConnected) {
+                    if(service!=null && service!!.lostConnection())
+                        runOnUiThread {
+                            Toast.makeText(this@GameActivity, "You lost internet connection", Toast.LENGTH_LONG).show()
+                            ReadyButton.isEnabled = false
+                            submitButton.isEnabled = false
+                        }
+                }
+            }
+        }
+    }
 }

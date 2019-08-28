@@ -2,20 +2,27 @@ package com.example.drawwars
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.net.NetworkInfo
+import android.net.wifi.WifiManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import com.example.drawwars.services.ServerService
 import com.example.drawwars.services.ServiceListener
+import io.reactivex.functions.Consumer
 import kotlinx.android.synthetic.main.activity_game_cycle.*
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.Exception
-import java.time.Duration
+import kotlin.system.exitProcess
+
 
 class GameCycleActivity : AppCompatActivity(), ServiceListener {
 
@@ -103,6 +110,18 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
                     finish()
                 }
             }
+            getString(R.string.Action_ServerDied)->{
+                runOnUiThread {
+                    val dialog: AlertDialog.Builder = AlertDialog.Builder(this@GameCycleActivity)
+                    dialog.setMessage("Server is down")
+                        .setPositiveButton("Ok") { _, _ ->
+                            service?.resetGameData()
+                            this@GameCycleActivity.finishAndRemoveTask()
+                            exitProcess(0);
+                        }
+                        .show()
+                }
+            }
         }
     }
 
@@ -137,10 +156,62 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
         bindService(serviceBindIntent, mViewModel!!.getServiceConnection(), Context.BIND_AUTO_CREATE)
     }
 
+    override fun onStop() {
+        unregisterReceiver(receiver)
+        super.onStop()
+    }
+
     override fun onBackPressed() {
         //Do nothing here.
     }
 
     ///endregion
 
+    override fun onStart() {
+        super.onStart()
+        val intentFilter = IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION)
+        registerReceiver(receiver, intentFilter)
+    }
+    private var receiver = object: BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            var connectionInfo = (intent?.extras?.get(WifiManager.EXTRA_NETWORK_INFO) as NetworkInfo)
+                if (connectionInfo.isConnected) {
+                    if (service != null) {
+                        if (service!!.regainedConnection()) {
+                            runOnUiThread {
+                                sendGuessButton.isEnabled = true
+                            }
+                            service!!.InteractionsWereLost(Consumer { Yes ->
+                                if (Yes) {
+                                    runOnUiThread {
+                                        val dialog: AlertDialog.Builder = AlertDialog.Builder(this@GameCycleActivity)
+                                        dialog.setMessage("Disconnected because of connection issues")
+                                            .setPositiveButton("Ok") { _, _ ->
+                                                service?.resetGameData()
+                                                this@GameCycleActivity.startActivity(
+                                                    Intent(
+                                                        this@GameCycleActivity,
+                                                        MainActivity::class.java
+                                                    )
+                                                )
+                                                this@GameCycleActivity.finish()
+                                            }
+                                            .show()
+                                    }
+                                } else
+                                    service!!.ConnectionIdMightHaveChanged()
+                            })
+                        }
+                    }
+                }
+                if (!connectionInfo.isConnected) {
+                    if(service!=null && service!!.lostConnection())
+                        runOnUiThread {
+                            Toast.makeText(this@GameCycleActivity, "You lost internet connection", Toast.LENGTH_LONG).show()
+                            sendGuessButton.isEnabled = false
+                        }
+                }
+
+        }
+    }
 }
