@@ -19,7 +19,6 @@ import com.example.drawwars.services.ServerService
 import com.example.drawwars.services.ServiceListener
 import io.reactivex.functions.Consumer
 import kotlinx.android.synthetic.main.activity_game_cycle.*
-import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.Exception
 import kotlin.system.exitProcess
 
@@ -83,7 +82,6 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
                     guessTextBox.text.clear()
                     guessTextBox.visibility = EditText.INVISIBLE
                     sendGuessButton.visibility = Button.INVISIBLE
-                    titleTextView.text = getString(R.string.StandbyTitle)
                     Toast.makeText(this@GameCycleActivity, getString(R.string.RightGuessMessage), Toast.LENGTH_LONG).show()
                 }
             }
@@ -181,7 +179,7 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
                             runOnUiThread {
                                 sendGuessButton.isEnabled = true
                             }
-                            service!!.InteractionsWereLost(Consumer { Yes ->
+                            service!!.interactionsWereLost(Consumer { Yes ->
                                 if (Yes) {
                                     runOnUiThread {
                                         val dialog: AlertDialog.Builder = AlertDialog.Builder(this@GameCycleActivity)
@@ -199,7 +197,7 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
                                             .show()
                                     }
                                 } else
-                                    service!!.ConnectionIdMightHaveChanged()
+                                    service!!.connectionIdMightHaveChanged()
                             })
                         }
                     }

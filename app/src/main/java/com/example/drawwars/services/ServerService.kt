@@ -2,6 +2,7 @@ package com.example.drawwars.services
 
 import android.app.Service
 import android.content.Intent
+import android.nfc.Tag
 import android.os.Binder
 import android.os.Build
 import android.os.Handler
@@ -32,11 +33,10 @@ class  ServerService: Service() {
     private var interactionCounter:AtomicInteger = AtomicInteger(0)
     private var connectionState:AtomicBoolean = AtomicBoolean()
     val binder : IBinder = MyBinder()
-    var handler: Handler? = null
-    val hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5000/Server").build()
-    val apiUrl = "http://10.0.2.2:5000/api/"
-    //val hubConnection = HubConnectionBuilder.create("http://52.211.139.236/DrawWars/Server").build()
-    //val apiUrl = "http://52.211.139.236/DrawWars/api/"
+    //val hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5000/Server").build()
+    //val apiUrl = "http://10.0.2.2:5000/api/"
+    val hubConnection = HubConnectionBuilder.create("http://52.211.139.236/DrawWars/Server").build()
+    val apiUrl = "http://52.211.139.236/DrawWars/api/"
     val drawingController = "drawing/"
     val gameInfoController = "GameInfo/"
     var gameContext:HandShakeResult?=null
@@ -51,7 +51,6 @@ class  ServerService: Service() {
 
     override fun onCreate() {
         super.onCreate()
-        handler = Handler()
         hubConnection.start()
         connectionState.set(true)
 
@@ -59,7 +58,7 @@ class  ServerService: Service() {
         hubConnection.on(getString(R.string.Action_AckSession), { x-> gameContext = HandShakeResult(x.session,x.playerId ); interactionCounter.incrementAndGet();notifyListeners(getString(R.string.Action_AckSession),null)  }, HandShakeResult::class.java)
         hubConnection.on(getString(R.string.Action_AckNickName)) {interactionCounter.incrementAndGet(); notifyListeners(getString(R.string.Action_AckNickName),null)}
         hubConnection.on(getString(R.string.Action_NonExistingSession),{uid->notifyListeners(getString(R.string.Action_NonExistingSession),uid)}, UUID::class.java)
-        hubConnection.on(getString(R.string.Action_DrawThemes),  {m -> interactionCounter.incrementAndGet(); notifyListeners(getString(R.string.Action_DrawThemes),m ) }, Any::class.java)//as HashMap<UUID, List<String>>
+        hubConnection.on(getString(R.string.Action_DrawThemes),  {m -> interactionCounter.incrementAndGet(); notifyListeners(getString(R.string.Action_DrawThemes),m ) }, Any::class.java)
         hubConnection.on(getString(R.string.Action_TryAndGuess)) {interactionCounter.incrementAndGet(); notifyListeners(getString(R.string.Action_TryAndGuess),null)}
         hubConnection.on(getString(R.string.Action_StandBy)) {interactionCounter.incrementAndGet(); notifyListeners(getString(R.string.Action_StandBy),null)}
         hubConnection.on(getString(R.string.Action_WrongGuess)) {interactionCounter.incrementAndGet(); notifyListeners(getString(R.string.Action_WrongGuess),null)}
@@ -133,75 +132,74 @@ class  ServerService: Service() {
         listeners -= listener
     }
 
-    fun Inlist(room:String){
+    fun inlist(room:String){
         if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
             hubConnection.start()
         var deviceId = DeviceIdentification.DeviceID(this);
         hubConnection.send(getString(R.string.Action_Inlist), room, deviceId)
     }
-
     fun sendNickName(nickname:String){
         if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
             hubConnection.start()
         hubConnection.send(getString(R.string.Action_SetNickname), gameContext, nickname)
         interactionCounter.incrementAndGet();
     }
-    fun SetArt(draw : String, theme:String){
+    fun setArt(draw : String, theme:String){
         if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
             hubConnection.start()
 
         var body = "{ \"SessionId\" : \"${gameContext!!.session}\", \"PlayerId\" : \"${gameContext!!.playerId}\",\"Extension\" : \"PNG\",\"Drawing\" : \"$draw\", \"Theme\" : \"$theme\"}"
         Thread {
-            var res = khttp.extensions.post(apiUrl + drawingController +"submit", headers = mapOf("Content-Type" to "application/json"), data = body)
-                .subscribe(io.reactivex.functions.Consumer {
-                    interactionCounter.incrementAndGet()
-                    if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
-                        hubConnection.start()
-                    hubConnection.send(getString(R.string.Action_DrawSubmitted), gameContext)
-                    interactionCounter.incrementAndGet()
-                    for(listener in listeners)
-                        listener.Interaction(getString(R.string.Action_DrawSubmitted),"")
-                }
+            khttp.extensions.post(apiUrl + drawingController +"submit", headers = mapOf("Content-Type" to "application/json"), data = body)
+                .subscribe(
+                    {
+                        interactionCounter.incrementAndGet()
+                        if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
+                            hubConnection.start()
+                        hubConnection.send(getString(R.string.Action_DrawSubmitted), gameContext)
+                        interactionCounter.incrementAndGet()
+                        for(listener in listeners)
+                            listener.Interaction(getString(R.string.Action_DrawSubmitted),"")
+                    },
+                    {
+                            t:Throwable ->  Log.d(TAG, "Draw Post Failed ${t.message}")
+                    }
             )
         }.start()
     }
-
-    fun Ready() {
+    fun ready() {
         if(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
             hubConnection.start()
         hubConnection.send(getString(R.string.Action_Ready), gameContext)
         interactionCounter.incrementAndGet()
     }
-
     fun sendGuess(guess:String) {
         while(hubConnection.connectionState== HubConnectionState.DISCONNECTED)
             hubConnection.start()
         hubConnection.send(getString(R.string.Action_SendGuess), gameContext, guess)
         interactionCounter.incrementAndGet()
     }
-
-
-    ///endregion
-
-    fun InteractionsWereLost(callback : Consumer<Boolean>)  {
+    fun interactionsWereLost(callback : Consumer<Boolean>)  {
         Thread {
-            var res =
-                khttp.extensions.get("$apiUrl${gameInfoController}interactionCount/${gameContext?.session}/${gameContext?.playerId}")
-                    .subscribe(Consumer {
-                        var countersDifer = String(it.content).toInt()!=interactionCounter.get()
-                        callback.accept(countersDifer)
-                    })
-                //callback.accept(String(res.content).toInt()!=interactionCounter.get())
+            khttp.extensions.get("$apiUrl${gameInfoController}interactionCount/${gameContext?.session}/${gameContext?.playerId}")
+                .subscribe({
+                    val countersDiffer = String(it.content).toInt()!=interactionCounter.get()
+                    callback.accept(countersDiffer)
+                },
+                    { t ->  Log.d(TAG, "Get InteractionLost failed: ${t.message}") })
         }.start()
     }
-
-    fun ConnectionIdMightHaveChanged() {
+    fun connectionIdMightHaveChanged() {
         while(hubConnection.connectionState== HubConnectionState.DISCONNECTED) {
             hubConnection.start()
             Thread.sleep(100) //NEEDS TIME TO PROCESS INITIAL HANDSHAKE
         }
         hubConnection.send(getString(R.string.Action_ConnectionIdChanged), gameContext)
     }
+
+    ///endregion
+
+
 
     fun resetGameData(){
         listeners = ArrayList()

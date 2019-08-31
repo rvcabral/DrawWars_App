@@ -6,19 +6,14 @@ import android.content.*
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.net.wifi.WifiManager
-import android.net.wifi.aware.WifiAwareManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.Settings
 import android.support.v7.app.AlertDialog
-import android.widget.Button
 import com.example.drawwars.services.ServerService
 import kotlinx.android.synthetic.main.activity_main.*
 import com.example.drawwars.services.ServerService.MyBinder
 import android.widget.Toast
 import com.example.drawwars.services.ServiceListener
-import com.example.drawwars.utils.SharedUtil.Companion.WifiDisabled
-import kotlinx.android.synthetic.main.activity_game.*
 
 
 class MainActivity : AppCompatActivity(), ServiceListener {
@@ -32,6 +27,7 @@ class MainActivity : AppCompatActivity(), ServiceListener {
             getString(R.string.Action_NonExistingSession) -> {
                 runOnUiThread{
                     Toast.makeText(this@MainActivity, getString(R.string.InvalidRoomMessage), Toast.LENGTH_LONG).show()
+                    SubmitButton.isEnabled = true
                 }
             }
         }
@@ -84,7 +80,8 @@ class MainActivity : AppCompatActivity(), ServiceListener {
 
         SubmitButton?.setOnClickListener {
             if(CodeInput.text.isNotEmpty()){
-                service?.Inlist(CodeInput.text.toString())
+                service?.inlist(CodeInput.text.toString())
+                SubmitButton.isEnabled = false
             }
         }
 

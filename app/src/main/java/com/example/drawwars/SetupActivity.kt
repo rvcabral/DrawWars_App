@@ -9,17 +9,13 @@ import android.content.IntentFilter
 import android.net.NetworkInfo
 import android.net.wifi.WifiManager
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast
 import com.example.drawwars.services.ServerService
 import com.example.drawwars.services.ServiceListener
 import io.reactivex.functions.Consumer
-import kotlinx.android.synthetic.main.activity_main.*
 
-import kotlinx.android.synthetic.main.activity_setup.*
-import kotlinx.android.synthetic.main.content_setup.*
 import kotlinx.android.synthetic.main.content_setup.CodeInput
 import kotlinx.android.synthetic.main.content_setup.SubmitButton
 
@@ -101,7 +97,7 @@ class SetupActivity : AppCompatActivity(), ServiceListener {
                             runOnUiThread {
                                 SubmitButton.isEnabled = true
                             }
-                            service!!.InteractionsWereLost(Consumer { Yes ->
+                            service!!.interactionsWereLost(Consumer { Yes ->
                                 if(Yes) {
                                     runOnUiThread {
                                         val dialog: AlertDialog.Builder = AlertDialog.Builder(this@SetupActivity)
@@ -120,7 +116,7 @@ class SetupActivity : AppCompatActivity(), ServiceListener {
                                     }
                                 }
                                 else
-                                    service!!.ConnectionIdMightHaveChanged()
+                                    service!!.connectionIdMightHaveChanged()
                             })
                         }
 
