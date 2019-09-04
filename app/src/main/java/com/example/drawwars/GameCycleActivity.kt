@@ -114,6 +114,7 @@ class GameCycleActivity : AppCompatActivity(), ServiceListener {
                     dialog.setMessage("Server is down")
                         .setPositiveButton("Ok") { _, _ ->
                             service?.resetGameData()
+                            stopService(Intent(this@GameCycleActivity, ServerService::class.java))
                             this@GameCycleActivity.finishAndRemoveTask()
                             exitProcess(0);
                         }
